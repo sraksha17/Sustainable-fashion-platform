@@ -1,0 +1,58 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Orders & Sales{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>Completed Payments (Sales)</h2>
+    <div style="overflow-x: auto;">
+        <table class="donation-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Buyer</th>
+                    <th>Designer</th>
+                    <th>Amount (₹)</th>
+                    <th>Commission (20%)</th>
+                    <th>Designer Earnings</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="sales-tbody">
+                <tr><td colspan="7" style="text-align: center;">Loading orders...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function loadSales() {
+        const tbody = document.getElementById('sales-tbody');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading...</td></tr>';
+        
+        try {
+            const response = await fetch('/api/admin/sales');
+            const data = await response.json();
+            
+            if (data.status === 'success' && data.sales.length > 0) {
+                tbody.innerHTML = '';
+                for (const sale of data.sales) {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerHTML = sale.design_name;
+                    row.insertCell(1).innerHTML = sale.buyer_email;
+                    row.insertCell(2).innerHTML = sale.designer_email;
+                    row.insertCell(3).innerHTML = `₹${sale.price}`;
+                    row.insertCell(4).innerHTML = `₹${sale.commission}`;
+                    row.insertCell(5).innerHTML = `₹${sale.designer_earnings}`;
+                    row.insertCell(6).innerHTML = sale.sold_at;
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No sales yet. Complete a Razorpay test payment to see orders.</td></tr>';
+            }
+        } catch (err) {
+            console.error(err);
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Error loading sales.</td></tr>';
+        }
+    }
+
+    loadSales();
+</script>
+{% endblock %}

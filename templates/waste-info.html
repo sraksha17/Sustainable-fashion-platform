@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Textile Waste Crisis – ReStyle Solution</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Homepage.css') }}">
+    <style>
+        .info-page { padding: 100px 0; background: #f8f9fa; }
+        .info-container { max-width: 900px; margin: 0 auto; padding: 0 20px; line-height: 1.8; }
+        .highlight { background: var(--primary); color: white; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .back-btn { display: inline-block; margin: 30px 0; padding: 12px 30px; background: var(--primary); color: white; text-decoration: none; border-radius: 30px; }
+    </style>
+</head>
+<body>
+    <div class="info-page">
+        <div class="info-container">
+            <a href="/" class="back-btn">Back to Home</a>
+            <h1 style="text-align:center; color:var(--primary); margin-bottom:30px;">
+                The Textile Waste Crisis – And How ReStyle Fixes It
+            </h1>
+
+            <div class="highlight">
+                <h3>92 Million Tons</h3>
+                <p>of textile waste is produced globally every year — equivalent to a garbage truck of clothes dumped every second.</p>
+            </div>
+
+            <div class="highlight">
+                <h3>10% of Global CO₂</h3>
+                <p>The fashion industry emits more carbon than all international flights and maritime shipping combined.</p>
+            </div>
+
+            <h2 style="margin-top:50px;">Why ReStyle is the Best Solution:</h2>
+            <ul style="font-size:1.2rem; margin:30px 0;">
+                <li>Direct donation → zero middlemen → 100% of clothes reused</li>
+                <li>Earn points for donating → you get rewarded</li>
+                <li>Local designers upcycle → supports community & reduces shipping emissions</li>
+                <li>Buy upcycled fashion → close the loop, nothing goes to landfill</li>
+                <li>Transparent tracking → see exactly where your clothes go</li>
+            </ul>
+
+            <p style="font-size:1.3rem; text-align:center; margin-top:50px;">
+                <strong>ReStyle isn't just a platform — it's a movement.</strong><br>
+                Together, we're proving sustainable fashion can be beautiful, affordable, and fun.
+            </p>
+
+            <div style="text-align:center; margin-top:50px;">
+                <a href="{{ url_for('auth.signup') }}" class="btn btn-primary" style="font-size:1.3rem; padding:16px 40px;">
+                    Join ReStyle – Start Today
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

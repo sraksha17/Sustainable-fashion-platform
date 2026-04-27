@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Checkout</h2>
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Order Summary</h5>
+                    <div id="order-summary"></div>
+                    <hr>
+                    <div class="mb-3">
+                        <label class="form-label">Shipping Address</label>
+                        <textarea class="form-control" id="address" rows="2" required placeholder="Enter your full address"></textarea>
+                    </div>
+                    <div id="payment-button-area"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    let checkoutData = null;
+
+    async function loadCheckoutData() {
+        const response = await fetch('/payment/checkout-data');
+        const data = await response.json();
+        if (data.success) {
+            checkoutData = data;
+            const summaryDiv = document.getElementById('order-summary');
+            summaryDiv.innerHTML = `
+                <div>Original Total: ₹${checkoutData.original_total.toFixed(2)}</div>
+                ${checkoutData.discount > 0 ? `<div>Points Discount: -₹${checkoutData.discount.toFixed(2)} (used ${checkoutData.points_used} points)</div>` : ''}
+                <div><strong>Final Total: ₹${checkoutData.final_total.toFixed(2)}</strong></div>
+            `;
+            const buttonArea = document.getElementById('payment-button-area');
+            if (checkoutData.final_total <= 0) {
+                // Zero amount: show Place Order button (no Razorpay)
+                buttonArea.innerHTML = '<button class="btn btn-success w-100" id="place-order-btn">Place Order (0 payment)</button>';
+                document.getElementById('place-order-btn').addEventListener('click', placeZeroAmountOrder);
+            } else {
+                // Positive amount: show Razorpay button
+                buttonArea.innerHTML = `<button class="btn btn-primary w-100" id="pay-btn">Pay ₹${checkoutData.final_total.toFixed(2)}</button>`;
+                document.getElementById('pay-btn').addEventListener('click', initiateRazorpayPayment);
+            }
+        } else {
+            alert('Error loading checkout data. Please go back to cart.');
+            window.location.href = '/buyer/cart';
+        }
+    }
+
+    async function initiateRazorpayPayment() {
+        const address = document.getElementById('address').value;
+        if (!address.trim()) {
+            alert('Please enter shipping address');
+            return;
+        }
+        // Save address to session
+        await fetch('/payment/update-address', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ shipping_address: address })
+        });
+        
+        const response = await fetch('/payment/create-order', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({})
+        });
+        const order = await response.json();
+        if (!order.success) {
+            alert('Error: ' + order.error);
+            return;
+        }
+        const options = {
+            key: "{{ config.RAZORPAY_KEY_ID }}",
+            amount: order.amount,
+            currency: order.currency,
+            name: "ReStyle",
+            description: "Purchase with points discount",
+            order_id: order.order_id,
+            handler: async (resp) => {
+                const verifyRes = await fetch('/payment/verify', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        razorpay_order_id: resp.razorpay_order_id,
+                        razorpay_payment_id: resp.razorpay_payment_id,
+                        razorpay_signature: resp.razorpay_signature
+                    })
+                });
+                const result = await verifyRes.json();
+                if (result.success) {
+                    alert('Payment successful!');
+                    window.location.href = '/payment/success';
+                } else {
+                    alert('Payment verification failed');
+                }
+            },
+            theme: { color: "#2e8b57" }
+        };
+        const rzp = new Razorpay(options);
+        rzp.open();
+    }
+
+    async function placeZeroAmountOrder() {
+        const address = document.getElementById('address').value;
+        if (!address.trim()) {
+            alert('Please enter shipping address');
+            return;
+        }
+        const response = await fetch('/payment/place-zero-amount-order', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ shipping_address: address })
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Order placed successfully using your points!');
+            window.location.href = '/payment/success';
+        } else {
+            alert('Error: ' + data.error);
+        }
+    }
+
+    loadCheckoutData();
+</script>
+{% endblock %}

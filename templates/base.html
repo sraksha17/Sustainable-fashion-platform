@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReStyle - Sustainable Fashion</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        .navbar-brand i {
+            color: #2e8b57;
+        }
+        .dropdown-item i {
+            width: 24px;
+            margin-right: 8px;
+        }
+        .notification-icon {
+            position: relative;
+            margin-left: 1rem;
+            color: #6c757d;
+            transition: color 0.2s;
+        }
+        .notification-icon:hover {
+            color: #2e8b57;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .alert {
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+        footer {
+            background-color: #343a40;
+            color: #adb5bd;
+            padding: 2rem 0;
+            margin-top: 3rem;
+            text-align: center;
+        }
+        .btn-outline-success {
+            color: #2e8b57;
+            border-color: #2e8b57;
+        }
+        .btn-outline-success:hover {
+            background-color: #2e8b57;
+            border-color: #2e8b57;
+        }
+        .dropdown-item.active {
+            background-color: #e9ecef;
+            color: #2e8b57;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-recycle"></i> ReStyle
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('waste_info') }}">Waste Info</a>
+                    </li>
+
+                    {% if session.user_email %}
+                        <!-- Role-specific navigation for buyer -->
+                        {% if session.active_role == 'buyer' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('buyer.marketplace') }}">Marketplace</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('buyer.cart') }}">Cart</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                        </li>
+
+                        <!-- Role Switcher Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="roleDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-exchange-alt"></i> Role
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                {% if 'donor' in session.roles %}
+                                    <li>
+                                        <a class="dropdown-item {% if session.active_role == 'donor' %}active{% endif %}" href="{{ url_for('auth.switch_role', role='donor') }}">
+                                            <i class="fas fa-hand-holding-heart"></i> Donor
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% if 'designer' in session.roles %}
+                                    <li>
+                                        <a class="dropdown-item {% if session.active_role == 'designer' %}active{% endif %}" href="{{ url_for('auth.switch_role', role='designer') }}">
+                                            <i class="fas fa-cut"></i> Designer
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% if 'buyer' in session.roles %}
+                                    <li>
+                                        <a class="dropdown-item {% if session.active_role == 'buyer' %}active{% endif %}" href="{{ url_for('auth.switch_role', role='buyer') }}">
+                                            <i class="fas fa-shopping-bag"></i> Buyer
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+
+                        <!-- Notification Icon -->
+                        <li class="nav-item">
+                            <a href="#" class="notification-icon" id="notification-icon">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge hidden" id="notification-badge">0</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.signup') }}">Sign Up</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 ReStyle. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const badge = document.getElementById('notification-badge');
+            if (badge && badge.innerText === '0') {
+                badge.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Marketplace</h2>
+        <div class="points-badge bg-warning text-dark p-2 rounded">
+            🎁 Your Points: <strong id="user-points">0</strong>
+        </div>
+    </div>
+    <div class="row" id="products-grid">
+        <!-- Products will be loaded here -->
+    </div>
+</div>
+
+<script>
+    let userPoints = 0;
+
+    async function loadUserPoints() {
+        const response = await fetch('/api/current-user'); // You need an endpoint to get current user's points
+        // Alternatively, pass points from session via template – easier: add a hidden element
+        // We'll fetch from a new endpoint quickly
+        try {
+            const res = await fetch('/api/user-points');
+            const data = await res.json();
+            if (data.success) {
+                userPoints = data.points;
+                document.getElementById('user-points').innerText = userPoints;
+            }
+        } catch(e) { console.log(e); }
+    }
+
+    async function loadProducts() {
+        const response = await fetch('/buyer/api/products');
+        const products = await response.json();
+        const grid = document.getElementById('products-grid');
+        if (products.length === 0) {
+            grid.innerHTML = '<div class="col-12"><p>No products available.</p></div>';
+            return;
+        }
+        grid.innerHTML = products.map(product => `
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="${product.image_urls[0] || '/static/images/placeholder.jpg'}" class="card-img-top" alt="${product.name}" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">${product.name}</h5>
+                        <p class="card-text">₹${product.price}</p>
+                        <p class="card-text"><small class="text-muted">By ${product.designer_name || 'Designer'}</small></p>
+                        <p class="card-text reward-points" style="color: #f59e0b; font-weight: bold;">🎁 ${product.reward_points || 0} reward points</p>
+                        <button class="btn btn-primary" onclick="addToCart('${product._id}')">Add to Cart</button>
+                        <button class="btn btn-outline-secondary" onclick="showProductDetail('${product._id}')">View Details</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function addToCart(designId) {
+        const response = await fetch('/buyer/api/cart', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({design_id: designId, quantity: 1})
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Added to cart!');
+        } else {
+            alert('Error: ' + data.error);
+        }
+    }
+
+    async function showProductDetail(productId) {
+        const response = await fetch(`/buyer/api/product/${productId}`);
+        const product = await response.json();
+        const modalHtml = `
+            <div class="modal fade" id="productModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${product.name}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <img src="${product.image_urls[0]}" class="img-fluid">
+                                </div>
+                                <div class="col-md-6">
+                                    <h4>₹${product.price}</h4>
+                                    <p class="text-warning fw-bold">🎁 ${product.reward_points || 0} points</p>
+                                    <p><strong>Designer:</strong> ${product.designer_name}</p>
+                                    <p>${product.description || ''}</p>
+                                    <label>Quantity:</label>
+                                    <input type="number" id="detail-qty" value="1" min="1" class="form-control w-25 d-inline ms-2">
+                                    <button class="btn btn-success mt-2" onclick="addToCartWithQty('${product._id}')">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        // Remove existing modal if any
+        const oldModal = document.getElementById('productModal');
+        if (oldModal) oldModal.remove();
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = new bootstrap.Modal(document.getElementById('productModal'));
+        modal.show();
+    }
+
+    async function addToCartWithQty(designId) {
+        const qty = parseInt(document.getElementById('detail-qty').value) || 1;
+        await addToCart(designId, qty);
+        const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+        if (modal) modal.hide();
+    }
+
+    loadUserPoints();
+    loadProducts();
+</script>
+<!-- Ensure Bootstrap JS is loaded -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

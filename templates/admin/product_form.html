@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% block page_title %}{{ 'Edit' if product else 'Add' }} Product{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <h2>{{ 'Edit' if product else 'Add New' }} Product</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>Product Name *</label>
+            <input type="text" name="name" class="form-control" value="{{ product.name if product else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>Price (₹) *</label>
+            <input type="number" step="0.01" name="price" class="form-control" value="{{ product.price if product else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" class="form-control" rows="3">{{ product.description if product else '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Size</label>
+            <input type="text" name="size" class="form-control" value="{{ product.size if product else '' }}">
+        </div>
+        <div class="form-group">
+            <label>Style</label>
+            <input type="text" name="style" class="form-control" value="{{ product.style if product else '' }}">
+        </div>
+        <div class="form-group">
+            <label>Source Material</label>
+            <input type="text" name="source_material" class="form-control" value="{{ product.source_material if product else '' }}">
+        </div>
+        <div class="form-group">
+            <label>Designer Name</label>
+            <input type="text" name="designer_name" class="form-control" value="{{ product.designer_name if product else 'Admin' }}">
+        </div>
+        <div class="form-group">
+            <label>Designer Email</label>
+            <input type="email" name="designer_email" class="form-control" value="{{ product.designer_email if product else 'admin@restyle.com' }}">
+        </div>
+        <div class="form-group">
+            <label>Reward Points (for buyer redemption)</label>
+            <input type="number" name="reward_points" class="form-control" value="{{ product.reward_points if product else 0 }}">
+            <small>Points that a buyer can earn or redeem (future feature).</small>
+        </div>
+        <div class="form-group">
+            <label>Product Images</label>
+            <input type="file" name="images" multiple class="form-control" accept="image/*">
+            {% if product and product.images %}
+                <small>Current: {{ product.images|length }} image(s). Upload new ones to add more.</small>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Save Product</button>
+        <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

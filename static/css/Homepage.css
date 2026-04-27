@@ -1,0 +1,226 @@
+/* ============================================= */
+/*      RESTYLE – FINAL & FULLY WORKING CSS      */
+/*  Only footer links (Login/Sign Up) now white  */
+/* ============================================= */
+
+:root {
+    --primary: #2e8b57;
+    --primary-light: #3cb371;
+    --secondary: #f4a460;
+    --dark: #2c3e50;
+    --light: #f8f9f9;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #f9f9f9; color: var(--dark); line-height: 1.6; }
+
+.container { max-width: 1200px; width: 90%; margin: 0 auto; padding: 0 15px; }
+
+/* ================== BUTTONS ================== */
+.btn {
+    display: inline-block;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-primary    { background: var(--primary); color: white; border: 2px solid var(--primary); }
+.btn-primary:hover { background: var(--primary-light); border-color: var(--primary-light); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(46,139,87,0.4); }
+
+.btn-secondary  { background: var(--secondary); color: white; }
+.btn-secondary:hover { background: #e9967a; transform: translateY(-3px); }
+
+.btn-outline    { background: transparent; color: var(--primary); border: 2.5px solid var(--primary); }
+.btn-outline:hover { background: var(--primary); color: white; }
+
+/* ================== HEADER & NAV ================== */
+header {
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.logo i { margin-right: 10px; font-size: 2.2rem; }
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 35px;
+}
+
+.nav-links a {
+    color: var(--dark);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.05rem;
+}
+
+.nav-links a:hover { color: var(--primary); }
+
+.auth-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.auth-buttons .btn-outline {
+    background: white !important;
+    color: var(--primary) !important;
+    border: 2.5px solid var(--primary) !important;
+    font-weight: 600;
+}
+
+.auth-buttons .btn-primary {
+    background: var(--primary) !important;
+    color: white !important;
+    border: 2.5px solid var(--primary) !important;
+    font-weight: 600;
+}
+
+.auth-buttons .btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(46,139,87,0.35);
+}
+
+.menu-toggle { display: none; font-size: 1.8rem; cursor: pointer; color: var(--primary); }
+
+/* ================== HERO ================== */
+.hero {
+    background: linear-gradient(rgba(0,0,0,0.68), rgba(0,0,0,0.68)),
+                url('../images/hero-custom.jpg') center/cover no-repeat fixed;
+    color: white;
+    text-align: center;
+    padding: 200px 20px;
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('../images/hero-custom.jpg') center/cover no-repeat fixed;
+    filter: blur(3px);
+    z-index: -1;
+}
+
+.hero h1 {
+    font-size: 4.3rem;
+    font-weight: 900;
+    text-shadow: 4px 4px 20px rgba(0,0,0,0.9);
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 1.4rem;
+    max-width: 800px;
+    margin: 0 auto 40px;
+    text-shadow: 2px 2px 12px rgba(0,0,0,0.9);
+}
+
+.hero-buttons { display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; }
+
+/* ================== REST OF SECTIONS ================== */
+section { padding: 90px 0; }
+.section-title h2 { font-size: 2.6rem; text-align: center; margin-bottom: 20px; color: var(--dark); }
+
+.steps { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; }
+.step { flex: 1; min-width: 280px; text-align: center; padding: 40px 25px; background: white; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); transition: 0.3s; }
+.step:hover { transform: translateY(-12px); }
+.step-icon { font-size: 3.8rem; color: var(--primary-light); margin-bottom: 20px; }
+
+.stats { background: var(--primary); color: white; text-align: center; padding: 100px 0; }
+.stats-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; }
+.stat-number { font-size: 3.5rem; font-weight: 700; }
+.stat-text { font-size: 1.15rem; margin-top: 8px; }
+
+.testimonials { background: #f5f5f5; }
+.testimonial-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
+.testimonial-card { background: white; padding: 35px; border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+
+.cta { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; text-align: center; padding: 110px 20px; }
+
+/* ================== FOOTER – ONLY LINKS MADE WHITE ================== */
+footer {
+    background: var(--dark);
+    color: #ddd;
+    padding: 90px 0 30px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 50px;
+    margin-bottom: 40px;
+}
+
+/* ONLY THE LINKS IN THE FOOTER (Login, Sign Up, etc.) ARE NOW PURE WHITE */
+.footer-links a {
+    color: white !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--primary-light) !important;
+}
+
+/* Social icons stay light gray (or change if you want) */
+.social-links a {
+    color: #ddd;
+    font-size: 1.5rem;
+    margin-right: 15px;
+}
+
+.social-links a:hover {
+    color: var(--primary-light);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 25px;
+    border-top: 1px solid #444;
+    font-size: 0.95rem;
+    color: #bbb;
+}
+
+/* ================== MOBILE ================== */
+@media (max-width: 768px) {
+    .nav-links, .auth-buttons { display: none; }
+    .nav-links.active, .auth-buttons.active { 
+        display: flex; 
+        flex-direction: column; 
+        background: white; 
+        position: absolute; 
+        top: 100%; left: 0; right: 0; 
+        padding: 20px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+        gap: 15px;
+    }
+    .menu-toggle { display: block; }
+    .hero h1 { font-size: 2.8rem; }
+    .hero p { font-size: 1.15rem; }
+}

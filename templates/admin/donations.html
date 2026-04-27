@@ -1,0 +1,147 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Donations Management{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>Donations</h2>
+    <div class="filters" style="margin-bottom: 20px;">
+        <button class="filter-btn active" data-status="all">All</button>
+        <button class="filter-btn" data-status="pending">Pending</button>
+        <button class="filter-btn" data-status="collected">Collected</button>
+        <button class="filter-btn" data-status="upcycled">Upcycled</button>
+        <button class="filter-btn" data-status="rejected">Rejected</button>
+    </div>
+    <div style="overflow-x: auto;">
+        <table class="donation-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Donor</th>
+                    <th>Item</th>
+                    <th>Points</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="donations-tbody">
+                <tr><td colspan="6" style="text-align: center;">Loading donations...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let currentFilter = 'all';
+
+    async function loadDonations() {
+        const tbody = document.getElementById('donations-tbody');
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Loading...</td></tr>';
+        
+        try {
+            const response = await fetch(`/api/admin/donations?status=${currentFilter}`);
+            const data = await response.json();
+            
+            if (data.status === 'success' && data.donations.length > 0) {
+                tbody.innerHTML = '';
+                for (const d of data.donations) {
+                    const row = tbody.insertRow();
+                    // Image
+                    const imgCell = row.insertCell(0);
+                    imgCell.innerHTML = `<img src="${d.image_url}" class="donation-image" style="width:60px; height:60px; object-fit:cover; border-radius:8px; cursor:pointer;" onclick="showImage('${d.image_url}')" onerror="this.src='/static/images/default-cloth.jpg'">`;
+                    // Donor
+                    row.insertCell(1).innerHTML = `${d.donor_name}<br><small>${d.donor_email}</small>`;
+                    // Item
+                    row.insertCell(2).innerHTML = `<strong>${d.item_name}</strong><br>${d.cloth_type} | ${d.condition} | Qty:${d.quantity}`;
+                    // Points
+                    row.insertCell(3).innerHTML = d.points;
+                    // Status
+                    row.insertCell(4).innerHTML = `<span class="status-badge status-${d.status}">${d.status}</span>`;
+                    // Actions
+                    const actionsCell = row.insertCell(5);
+                    let actionsHtml = '';
+                    if (d.status === 'pending') {
+                        actionsHtml = `<button class="action-btn btn-collect" onclick="updateDonationStatus('${d._id}', 'collected')">Collect</button>
+                                      <button class="action-btn btn-reject" onclick="updateDonationStatus('${d._id}', 'rejected')">Reject</button>`;
+                    } else if (d.status === 'collected') {
+                        actionsHtml = `<button class="action-btn btn-upcycle" onclick="updateDonationStatus('${d._id}', 'upcycled')">Upcycle</button>`;
+                    } else {
+                        actionsHtml = '<span style="color:gray;">No actions</span>';
+                    }
+                    actionsCell.innerHTML = actionsHtml;
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No donations found.</td></tr>';
+            }
+        } catch (err) {
+            console.error(err);
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Error loading donations. Check console.</td></tr>';
+        }
+    }
+
+    async function updateDonationStatus(id, status) {
+        const response = await fetch('/api/admin/update-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ donation_id: id, status: status })
+        });
+        if (response.ok) {
+            loadDonations();
+        } else {
+            alert('Failed to update status');
+        }
+    }
+
+    function showImage(url) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content" style="background:transparent; text-align:center;">
+                <span class="close-modal" style="color:white; position:absolute; top:20px; right:40px; font-size:40px; cursor:pointer;">&times;</span>
+                <img src="${url}" style="max-width:90vw; max-height:90vh; border-radius:8px;">
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('.close-modal').onclick = () => modal.remove();
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    }
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.getAttribute('data-status');
+            loadDonations();
+        });
+    });
+
+    loadDonations();
+</script>
+
+<style>
+    .action-btn {
+        padding: 4px 10px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 0 2px;
+        font-size: 12px;
+        color: white;
+    }
+    .btn-collect { background: #2563eb; }
+    .btn-upcycle { background: #059669; }
+    .btn-reject { background: #dc2626; }
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+    }
+    .status-pending { background: #f39c12; }
+    .status-collected { background: #3498db; }
+    .status-upcycled { background: #2ecc71; }
+    .status-rejected { background: #e74c3c; }
+</style>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Your Cart</h2>
+    <div id="cart-items"></div>
+    <div id="cart-summary"></div>
+    <div class="mt-3">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="use-points-checkbox">
+            <label class="form-check-label" for="use-points-checkbox">
+                Use my reward points (1 point = ₹1 discount)
+            </label>
+        </div>
+        <div id="points-info" class="mt-2"></div>
+        <button id="checkout-btn" class="btn btn-success mt-3">Proceed to Checkout</button>
+    </div>
+</div>
+
+<script>
+    let cartData = [];
+    let userPoints = 0;
+
+    async function loadUserPoints() {
+        const res = await fetch('/api/user-points');
+        const data = await res.json();
+        if (data.success) userPoints = data.points;
+        document.getElementById('points-info').innerHTML = `Your available points: ${userPoints}`;
+    }
+
+    async function loadCart() {
+        const response = await fetch('/buyer/api/cart');
+        cartData = await response.json();
+        const container = document.getElementById('cart-items');
+        const summaryDiv = document.getElementById('cart-summary');
+        if (cartData.length === 0) {
+            container.innerHTML = '<p>Your cart is empty.</p>';
+            summaryDiv.innerHTML = '';
+            document.getElementById('checkout-btn').style.display = 'none';
+            return;
+        }
+        let total = 0;
+        let html = '<div class="list-group">';
+        cartData.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            total += itemTotal;
+            html += `
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <img src="${item.image_url}" width="50" class="me-2">
+                        <strong>${item.name}</strong><br>
+                        ₹${item.price} x ${item.quantity} = ₹${itemTotal}
+                        <br><small class="text-warning"> ${item.reward_points} points</small>
+                    </div>
+                    <div>
+                        <input type="number" min="1" value="${item.quantity}" class="form-control form-control-sm w-auto d-inline" onchange="updateQuantity('${item.design_id}', this.value)">
+                        <button class="btn btn-sm btn-danger" onclick="removeItem('${item.design_id}')">Remove</button>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+        updateSummary(total);
+        document.getElementById('checkout-btn').style.display = 'block';
+    }
+
+    function updateSummary(originalTotal) {
+        const usePoints = document.getElementById('use-points-checkbox').checked;
+        let discount = 0;
+        let finalTotal = originalTotal;
+        let pointsUsed = 0;
+        if (usePoints && userPoints > 0) {
+            discount = Math.min(userPoints, originalTotal);
+            finalTotal = originalTotal - discount;
+            pointsUsed = discount;
+        }
+        const summaryHtml = `
+            <div class="card mt-3 p-3">
+                <h5>Order Summary</h5>
+                <div>Original Total: ₹${originalTotal.toFixed(2)}</div>
+                ${discount > 0 ? `<div>Points Discount: -₹${discount.toFixed(2)} (used ${pointsUsed} points)</div>` : ''}
+                <div><strong>Final Total: ₹${finalTotal.toFixed(2)}</strong></div>
+                <div>Your available points: ${userPoints}</div>
+            </div>
+        `;
+        document.getElementById('cart-summary').innerHTML = summaryHtml;
+    }
+
+    async function updateQuantity(designId, quantity) {
+        await fetch('/buyer/api/cart/update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({design_id: designId, quantity: parseInt(quantity)})
+        });
+        loadCart();
+    }
+
+    async function removeItem(designId) {
+        await fetch('/buyer/api/cart', {
+            method: 'DELETE',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({design_id: designId})
+        });
+        loadCart();
+    }
+
+    document.getElementById('use-points-checkbox').addEventListener('change', () => {
+        let total = 0;
+        cartData.forEach(item => total += item.price * item.quantity);
+        updateSummary(total);
+    });
+
+    document.getElementById('checkout-btn').addEventListener('click', async () => {
+        const usePoints = document.getElementById('use-points-checkbox').checked;
+        // Store the points choice in session and redirect to checkout page
+        const response = await fetch('/buyer/api/prepare-checkout', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ use_points: usePoints })
+        });
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = '/payment/checkout';
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+
+    loadUserPoints();
+    loadCart();
+</script>
+{% endblock %}

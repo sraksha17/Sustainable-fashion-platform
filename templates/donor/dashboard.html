@@ -1,0 +1,1320 @@
+{% extends "base.html" %}
+{% block title %}Donor Dashboard{% endblock %}
+{% block content %}
+<style>
+    /* All your CSS from previous file – keep it exactly as before */
+    :root {
+        --primary: #2e8b57;
+        --primary-light: #4caf7d;
+        --primary-dark: #1f6b3d;
+        --secondary: #ff6b6b;
+        --accent: #ffd166;
+        --beige: #fefcf8;
+        --beige-dark: #f5f2eb;
+        --light: #f8f9fa;
+        --dark: #2d3436;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --success: #28a745;
+        --warning: #ffc107;
+        --info: #17a2b8;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        background-color: var(--beige);
+        color: var(--dark);
+        line-height: 1.6;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .dashboard {
+        background-color: var(--beige);
+        min-height: 100vh;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        padding: 25px 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+
+    .dashboard-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .dashboard-nav ul {
+        display: flex;
+        list-style: none;
+        gap: 30px;
+    }
+
+    .dashboard-nav a {
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 25px;
+        transition: all 0.3s;
+        font-size: 16px;
+    }
+
+    .dashboard-nav a.active {
+        background-color: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-nav a:hover:not(.active) {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .dashboard-user {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .user-name {
+        font-weight: 800;
+        font-size: 18px;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .user-role {
+        font-size: 14px;
+        opacity: 0.9;
+        background: rgba(255, 255, 255, 0.25);
+        padding: 4px 12px;
+        border-radius: 15px;
+        margin-top: 5px;
+        font-weight: 600;
+    }
+
+    .notification-icon {
+        position: relative;
+        background: rgba(255, 255, 255, 0.25);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+    .notification-icon:hover {
+        background-color: rgba(255, 255, 255, 0.35);
+        transform: translateY(-2px);
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: var(--secondary);
+        color: white;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+    }
+
+    .notification-badge.hidden {
+        display: none;
+    }
+
+    .dashboard-content {
+        padding: 0 0 40px 0;
+    }
+
+    .dashboard-section {
+        display: none;
+    }
+
+    .dashboard-section.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    h2 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 900;
+        font-size: 32px;
+        color: var(--primary);
+        margin-bottom: 10px;
+    }
+
+    h3 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+        font-size: 24px;
+        color: var(--primary);
+        margin: 25px 0 15px;
+    }
+
+    p {
+        font-size: 16px;
+        color: var(--dark);
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px 25px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        text-align: center;
+        transition: transform 0.3s;
+        border: 1px solid var(--beige-dark);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-value {
+        font-size: 42px;
+        font-weight: 900;
+        color: var(--primary);
+        margin-bottom: 5px;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .stat-label {
+        color: var(--gray);
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+    }
+
+    .card {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        transition: transform 0.3s;
+        border: 1px solid var(--beige-dark);
+    }
+
+    .card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-img {
+        height: 200px;
+        background-color: var(--beige-dark);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .card-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover .card-img img {
+        transform: scale(1.05);
+    }
+
+    .card-body {
+        padding: 25px;
+    }
+
+    .card-title {
+        font-size: 20px;
+        margin-bottom: 10px;
+        color: var(--primary);
+        font-weight: 800;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .card-text {
+        color: var(--gray);
+        margin-bottom: 15px;
+    }
+
+    .card-footer {
+        padding: 20px 25px;
+        background-color: var(--beige);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .status-pending {
+        background-color: var(--warning);
+        color: var(--dark);
+    }
+
+    .status-collected {
+        background-color: var(--info);
+        color: white;
+    }
+
+    .status-upcycled {
+        background-color: var(--success);
+        color: white;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        background: white;
+    }
+
+    .table th, .table td {
+        padding: 18px 20px;
+        text-align: left;
+        border-bottom: 1px solid var(--beige-dark);
+    }
+
+    .table th {
+        background-color: var(--primary);
+        color: white;
+        font-weight: 700;
+    }
+
+    .table tr:hover {
+        background-color: rgba(46, 139, 87, 0.03);
+    }
+
+    .upload-area {
+        border: 2px dashed var(--beige-dark);
+        border-radius: 15px;
+        padding: 50px;
+        text-align: center;
+        margin-bottom: 30px;
+        transition: all 0.3s;
+        cursor: pointer;
+        background: white;
+    }
+
+    .upload-area:hover {
+        border-color: var(--primary);
+        background-color: rgba(46, 139, 87, 0.03);
+    }
+
+    .upload-area i {
+        font-size: 48px;
+        color: var(--primary);
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 700;
+        color: var(--dark);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 15px 20px;
+        border: 1px solid var(--beige-dark);
+        border-radius: 10px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+        background: white;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .points-display {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .points-value {
+        font-size: 52px;
+        font-weight: 900;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .points-label {
+        font-size: 20px;
+        opacity: 0.9;
+        font-weight: 600;
+    }
+
+    .notifications {
+        background-color: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        margin-bottom: 30px;
+        border: 1px solid var(--beige-dark);
+    }
+
+    .notification-item {
+        padding: 20px 0;
+        border-bottom: 1px solid var(--beige-dark);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: background-color 0.3s;
+        border-radius: 10px;
+        padding-left: 20px;
+        padding-right: 20px;
+        cursor: pointer;
+    }
+
+    .notification-item:hover {
+        background-color: var(--beige);
+    }
+
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-item.read {
+        opacity: 0.7;
+    }
+
+    .notification-icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .notification-content {
+        flex: 1;
+    }
+
+    .notification-content strong {
+        font-weight: 800;
+        font-size: 17px;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .notification-time {
+        color: var(--gray);
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 5px;
+    }
+
+    .images-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .image-preview-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 2px solid var(--beige-dark);
+    }
+
+    .image-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .remove-image {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: var(--secondary);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        color: var(--primary);
+    }
+
+    .loading.active {
+        display: block;
+    }
+
+    .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-nav {
+            flex-direction: column;
+            gap: 15px;
+        }
+        .dashboard-nav ul {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        .table {
+            display: block;
+            overflow-x: auto;
+        }
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="dashboard">
+    <!-- Dashboard Header (separate from base navbar) -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="dashboard-nav">
+                <div class="dashboard-user">
+                    <div class="user-info">
+                        <div class="user-name" id="user-name">Loading...</div>
+                        <div class="user-role">Donor</div>
+                    </div>
+                    <a href="#" class="notification-icon" id="notification-link">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge hidden" id="notification-badge">0</span>
+                    </a>
+                </div>
+                <ul>
+                    <li><a href="#" class="dashboard-link active" data-target="donor-overview">Dashboard</a></li>
+                    <li><a href="#" class="dashboard-link" data-target="upload-cloth">Upload</a></li>
+                    <li><a href="#" class="dashboard-link" data-target="donation-history">History</a></li>
+                    <li><a href="#" class="dashboard-link" data-target="rewards">Rewards</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+        <div class="container">
+            <!-- Loading Indicator -->
+            <div class="loading" id="loading">
+                <div class="loader"></div>
+                <p>Loading your dashboard...</p>
+            </div>
+
+            <!-- Donor Overview -->
+            <div id="donor-overview" class="dashboard-section active">
+                <h2>Donor Dashboard</h2>
+                <p id="welcome-message">Welcome back! Track your donations and impact.</p>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-donations">0</div>
+                        <div class="stat-label">Total Donations</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="reward-points">0</div>
+                        <div class="stat-label">Reward Points</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="items-upcycled">0</div>
+                        <div class="stat-label">Items Upcycled</div>
+                    </div>
+                </div>
+
+                <h3>Recent Donations</h3>
+                <div class="dashboard-grid" id="recent-donations-grid">
+                    <div class="loading" id="recent-loading">
+                        <div class="loader"></div>
+                        <p>Loading recent donations...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Cloth Section -->
+            <div id="upload-cloth" class="dashboard-section">
+                <h2>Upload New Donation</h2>
+                <p>Share photos of clothes you'd like to donate and earn <strong>valid points</strong>.</p>
+
+                <div class="upload-area" id="upload-area">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Upload Photos of Your Clothes</h3>
+                    <p>Drag & drop images here or click to browse</p>
+                    <input type="file" id="file-input" multiple style="display: none;" accept="image/*">
+                </div>
+
+                <div class="images-preview" id="images-preview"></div>
+
+                <form id="donation-form" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="item-name">Item Name</label>
+                        <input type="text" id="item-name" class="form-control" placeholder="e.g., Cotton T-shirts, Denim Jeans" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cloth-type">Cloth Type</label>
+                        <select id="cloth-type" class="form-control" required>
+                            <option value="">Select type</option>
+                            <option value="cotton">Cotton</option>
+                            <option value="denim">Denim</option>
+                            <option value="tshirt">T-shirt</option>
+                            <option value="silk">Silk</option>
+                            <option value="wool">Wool</option>
+                            <option value="polyester">Polyester</option>
+                            <option value="linen">Linen</option>
+                            <option value="suede">Suede</option>
+                            <option value="rayon">Rayon</option>
+                            <option value="mixed">Mixed</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="condition">Condition</label>
+                        <select id="condition" class="form-control" required>
+                            <option value="">Select condition</option>
+                            <option value="excellent">Excellent - Like new</option>
+                            <option value="good">Good - Lightly worn</option>
+                            <option value="fair">Fair - Shows some wear</option>
+                            <option value="poor">Poor - Significant wear</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <input type="number" id="quantity" class="form-control" min="1" value="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" class="form-control" rows="3" placeholder="Describe the items, any stains or damages, etc."></textarea>
+                    </div>
+
+                    <div class="points-display">
+                        <div class="points-value" id="predicted-points">0</div>
+                        <div class="points-label">Valid Points</div>
+                        <p style="margin-top: 10px; font-size: 0.9rem;">Calculated based on cloth type, condition, and quantity</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 18px; font-size: 17px; font-weight: 800;" id="submit-btn">
+                        Submit Donation
+                    </button>
+                </form>
+            </div>
+
+            <!-- Donation History Section -->
+            <div id="donation-history" class="dashboard-section">
+                <h2>Donation History</h2>
+                <p>Track all your previous donations and their status.</p>
+
+                <div class="loading" id="history-loading">
+                    <div class="loader"></div>
+                    <p>Loading donation history...</p>
+                </div>
+
+                <table class="table" id="donation-history-table" style="display: none;">
+                    <thead>
+                        <tr><th>Date</th><th>Items</th><th>Condition</th><th>Status</th><th>Points</th></tr>
+                    </thead>
+                    <tbody id="history-table-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Rewards Section -->
+            <div id="rewards" class="dashboard-section">
+                <h2>Your Rewards</h2>
+                <p>Track your reward points and see how they compare to your expectations.</p>
+
+                <div class="points-display">
+                    <div class="points-value" id="total-points">0</div>
+                    <div class="points-label">Total Reward Points</div>
+                </div>
+
+                <h3>Points Comparison</h3>
+                <p>See how your expected points compare to actual awarded points.</p>
+
+                <div class="loading" id="rewards-loading">
+                    <div class="loader"></div>
+                    <p>Loading rewards data...</p>
+                </div>
+
+                <table class="table" id="points-table" style="display: none;">
+                    <thead><tr><th>Donation</th><th>Expected Points</th><th>Actual Points</th><th>Difference</th></tr></thead>
+                    <tbody id="points-table-body"></tbody>
+                </table>
+
+                <h3>Redeem Points</h3>
+                <div class="dashboard-grid">
+                    <div class="card reward-card">
+                        <div class="card-body">
+                            <h3 class="card-title">₹250 Voucher</h3>
+                            <p class="card-text">Redeem for shopping on ReStyle platform</p>
+                            <div class="card-footer">
+                                <span>500 points</span>
+                                <button class="btn btn-primary" onclick="redeemPoints(500)">Redeem</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card reward-card">
+                        <div class="card-body">
+                            <h3 class="card-title">Eco-friendly Tote Bag</h3>
+                            <p class="card-text">Limited edition ReStyle tote bag</p>
+                            <div class="card-footer">
+                                <span>1,200 points</span>
+                                <button class="btn btn-primary" onclick="redeemPoints(1200)">Redeem</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div id="notifications" class="dashboard-section">
+                <h2>Notifications</h2>
+                <p>Stay updated with your donation activities.</p>
+
+                <div class="loading" id="notifications-loading">
+                    <div class="loader"></div>
+                    <p>Loading notifications...</p>
+                </div>
+
+                <div class="notifications" id="notifications-container" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== GLOBAL VARIABLES ====================
+    let currentUser = null;
+    let uploadedImages = [];
+
+    // ==================== DOM ELEMENTS ====================
+    const dashboardLinks = document.querySelectorAll('.dashboard-link');
+    const dashboardSections = document.querySelectorAll('.dashboard-section');
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const donationForm = document.getElementById('donation-form');
+    const imagesPreview = document.getElementById('images-preview');
+    const predictedPoints = document.getElementById('predicted-points');
+    const clothType = document.getElementById('cloth-type');
+    const condition = document.getElementById('condition');
+    const quantity = document.getElementById('quantity');
+    const notificationBadge = document.getElementById('notification-badge');
+    const notificationLink = document.getElementById('notification-link');
+    const submitBtn = document.getElementById('submit-btn');
+
+    const userNameElement = document.getElementById('user-name');
+    const welcomeMessage = document.getElementById('welcome-message');
+    const totalDonations = document.getElementById('total-donations');
+    const rewardPoints = document.getElementById('reward-points');
+    const itemsUpcycled = document.getElementById('items-upcycled');
+    const totalPoints = document.getElementById('total-points');
+
+    const loadingIndicator = document.getElementById('loading');
+    const recentLoading = document.getElementById('recent-loading');
+    const historyLoading = document.getElementById('history-loading');
+    const rewardsLoading = document.getElementById('rewards-loading');
+    const notificationsLoading = document.getElementById('notifications-loading');
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        loadingIndicator.classList.add('active');
+        loadUserData();
+        initializeEventListeners();
+        simulateAIPointsPrediction();
+    });
+
+    // ==================== USER DATA FUNCTIONS ====================
+    async function loadUserData() {
+        try {
+            const response = await fetch('/donor/api/current');
+            const result = await response.json();
+            if (result.status === 'success') {
+                currentUser = result.user;
+                userNameElement.textContent = currentUser.name;
+                welcomeMessage.textContent = `Welcome back, ${currentUser.name}! Track your donations and impact.`;
+                await loadDashboardData();
+                loadingIndicator.classList.remove('active');
+            } else {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            loadingIndicator.innerHTML = '<p style="color: var(--secondary);">Error loading dashboard. Please try again.</p>';
+        }
+    }
+
+    async function loadDashboardData() {
+        try {
+            const statsResponse = await fetch('/donor/api/stats');
+            const statsResult = await statsResponse.json();
+            // statsResult contains: total_donations, reward_points, items_upcycled
+            animateCounter(totalDonations, 0, statsResult.total_donations || 0, 1000);
+            animateCounter(rewardPoints, 0, statsResult.reward_points || 0, 1500);
+            animateCounter(itemsUpcycled, 0, statsResult.items_upcycled || 0, 1200);
+            animateCounter(totalPoints, 0, statsResult.reward_points || 0, 1500);
+            loadRecentDonations();
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+        }
+    }
+
+    async function loadRecentDonations() {
+        try {
+            recentLoading.style.display = 'block';
+            const response = await fetch('/donor/api/recent-donations');
+            const result = await response.json(); // result is an array of donations
+            recentLoading.style.display = 'none';
+            const recentContainer = document.getElementById('recent-donations-grid');
+            recentContainer.innerHTML = '';
+            if (result.length === 0) {
+                recentContainer.innerHTML = `
+                    <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <i class="fas fa-tshirt" style="font-size: 48px; color: var(--primary); margin-bottom: 20px;"></i>
+                        <h3>No Donations Yet</h3>
+                        <p>Start your sustainable journey by uploading your first donation!</p>
+                        <button class="btn btn-primary" onclick="showUploadSection()" style="margin-top: 20px;">Upload First Donation</button>
+                    </div>
+                `;
+            } else {
+                result.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    let statusClass = 'status-pending';
+                    let statusText = item.status || 'Pending';
+                    if (item.status === 'collected') statusClass = 'status-collected';
+                    else if (item.status === 'upcycled') statusClass = 'status-upcycled';
+                    const imageUrl = item.images && item.images[0] ? item.images[0] : '/static/images/default-cloth.jpg';
+                    card.innerHTML = `
+                        <div class="card-img">
+                            <img src="${imageUrl}" alt="${item.item_name}" loading="lazy" onerror="this.src='/static/images/default-cloth.jpg'">
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-title">${item.item_name}</h3>
+                            <p class="card-text">${item.quantity} ${item.cloth_type} item${item.quantity > 1 ? 's' : ''} in ${item.condition} condition</p>
+                            <div class="card-footer">
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                                <span>${item.actual_points || 0} points</span>
+                            </div>
+                        </div>
+                    `;
+                    recentContainer.appendChild(card);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading recent donations:', error);
+            recentLoading.innerHTML = '<p style="color: var(--secondary);">Error loading recent donations.</p>';
+        }
+    }
+
+    async function loadDonationHistory() {
+        try {
+            historyLoading.style.display = 'block';
+            document.getElementById('donation-history-table').style.display = 'none';
+            const response = await fetch('/donor/api/donations');
+            const result = await response.json(); // array of donations
+            historyLoading.style.display = 'none';
+            const tableBody = document.getElementById('history-table-body');
+            tableBody.innerHTML = '';
+            if (result.length === 0) {
+                tableBody.innerHTML = `
+                    <tr><td colspan="5" style="text-align: center; padding: 40px;">
+                        <i class="fas fa-tshirt" style="font-size: 48px; color: var(--primary); margin-bottom: 10px; display: block;"></i>
+                        <h4>No Donation History</h4>
+                        <p>Start by uploading your first donation!</p>
+                        <button class="btn btn-primary" onclick="showUploadSection()" style="margin-top: 20px;">Upload First Donation</button>
+                    </td></tr>
+                `;
+            } else {
+                result.forEach(item => {
+                    const row = document.createElement('tr');
+                    let statusClass = 'status-pending';
+                    let statusText = item.status || 'Pending';
+                    if (item.status === 'collected') statusClass = 'status-collected';
+                    else if (item.status === 'upcycled') statusClass = 'status-upcycled';
+                    const date = item.submission_date ? new Date(item.submission_date).toLocaleDateString() : 'Unknown';
+                    row.innerHTML = `
+                        <td>${date}</td>
+                        <td>${item.quantity} ${item.item_name}</td>
+                        <td>${item.condition || 'Unknown'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${item.actual_points || 0}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+            document.getElementById('donation-history-table').style.display = 'table';
+        } catch (error) {
+            console.error('Error loading donation history:', error);
+            historyLoading.innerHTML = '<p style="color: var(--secondary);">Error loading history. Please try again.</p>';
+        }
+    }
+
+    async function loadRewardsData() {
+        try {
+            rewardsLoading.style.display = 'block';
+            document.getElementById('points-table').style.display = 'none';
+            const statsResponse = await fetch('/donor/api/stats');
+            const statsResult = await statsResponse.json();
+            animateCounter(totalPoints, parseInt(totalPoints.textContent) || 0, statsResult.reward_points || 0, 1000);
+            const historyResponse = await fetch('/donor/api/donations');
+            const historyResult = await historyResponse.json();
+            rewardsLoading.style.display = 'none';
+            const tableBody = document.getElementById('points-table-body');
+            tableBody.innerHTML = '';
+            if (historyResult.length === 0) {
+                tableBody.innerHTML = `
+                    <tr><td colspan="4" style="text-align: center; padding: 40px;">
+                        <i class="fas fa-star" style="font-size: 48px; color: var(--primary); margin-bottom: 10px; display: block;"></i>
+                        <h4>No Points Data Yet</h4>
+                        <p>Complete your first donation to earn points!</p>
+                        <button class="btn btn-primary" onclick="showUploadSection()" style="margin-top: 20px;">Start Donating</button>
+                    </td></tr>
+                `;
+            } else {
+                historyResult.slice(0,5).forEach(item => {
+                    const row = document.createElement('tr');
+                    const actualPoints = item.actual_points || 0;
+                    const expectedPoints = Math.round(actualPoints * 0.9);
+                    const difference = actualPoints - expectedPoints;
+                    const differenceColor = difference > 0 ? 'var(--success)' : difference < 0 ? 'var(--secondary)' : 'var(--gray)';
+                    const differenceSign = difference > 0 ? '+' : '';
+                    row.innerHTML = `
+                        <td>${item.item_name}</td>
+                        <td>${expectedPoints}</td>
+                        <td>${actualPoints}</td>
+                        <td style="color: ${differenceColor}; font-weight: 700;">${differenceSign}${difference}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+            document.getElementById('points-table').style.display = 'table';
+        } catch (error) {
+            console.error('Error loading rewards data:', error);
+            rewardsLoading.innerHTML = '<p style="color: var(--secondary);">Error loading rewards. Please try again.</p>';
+        }
+    }
+
+    async function loadNotifications() {
+        try {
+            notificationsLoading.style.display = 'block';
+            document.getElementById('notifications-container').style.display = 'none';
+            const response = await fetch('/donor/api/notifications');
+            const result = await response.json();
+            notificationsLoading.style.display = 'none';
+            const container = document.getElementById('notifications-container');
+            container.innerHTML = '';
+            if (result.length === 0) {
+                container.innerHTML = `
+                    <div class="notification-item">
+                        <div class="notification-icon-circle" style="background: linear-gradient(135deg, var(--gray), var(--gray)80);">
+                            <i class="fas fa-bell-slash"></i>
+                        </div>
+                        <div class="notification-content">
+                            <strong>No Notifications</strong>
+                            <p>You're all caught up! Check back later for updates.</p>
+                            <div class="notification-time">No recent activity</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                result.forEach(notification => {
+                    const item = document.createElement('div');
+                    item.className = 'notification-item';
+                    if (!notification.read) item.style.backgroundColor = 'rgba(46, 139, 87, 0.05)';
+                    item.innerHTML = `
+                        <div class="notification-icon-circle" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
+                            <i class="fas ${notification.type === 'donation' ? 'fa-tshirt' : 'fa-info-circle'}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <strong>${notification.message.split('.')[0]}</strong>
+                            <p>${notification.message}</p>
+                            <div class="notification-time">${new Date(notification.created_at).toLocaleString()}</div>
+                        </div>
+                    `;
+                    if (!notification.read) {
+                        item.addEventListener('click', () => markNotificationRead(notification._id));
+                    }
+                    container.appendChild(item);
+                });
+            }
+            const unreadCount = result.filter(n => !n.read).length;
+            if (unreadCount > 0) {
+                notificationBadge.textContent = unreadCount;
+                notificationBadge.classList.remove('hidden');
+            } else {
+                notificationBadge.classList.add('hidden');
+            }
+            document.getElementById('notifications-container').style.display = 'block';
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+            notificationsLoading.innerHTML = '<p style="color: var(--secondary);">Error loading notifications. Please try again.</p>';
+        }
+    }
+
+    async function markNotificationRead(notificationId) {
+        try {
+            await fetch('/donor/api/notifications/mark-read', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notification_id: notificationId })
+            });
+            loadNotifications();
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    }
+
+    async function markAllNotificationsRead() {
+        // Optional: implement if needed
+    }
+
+    // ==================== IMAGE UPLOAD ====================
+    function updateImagePreview() {
+        imagesPreview.innerHTML = '';
+        uploadedImages.forEach((file, index) => {
+            const previewItem = document.createElement('div');
+            previewItem.className = 'image-preview-item';
+            const url = URL.createObjectURL(file);
+            previewItem.innerHTML = `
+                <img src="${url}" alt="Preview ${index+1}">
+                <button class="remove-image" onclick="removeImage(${index})"><i class="fas fa-times"></i></button>
+            `;
+            imagesPreview.appendChild(previewItem);
+        });
+    }
+
+    function removeImage(index) {
+        uploadedImages.splice(index, 1);
+        updateImagePreview();
+    }
+
+    // ==================== DONATION FORM SUBMISSION ====================
+    async function submitDonation(formData) {
+        try {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            submitBtn.disabled = true;
+            const response = await fetch('/donor/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (result.success) {
+                showNotification('Donation submitted successfully! Our team will schedule pickup.', 'success');
+                donationForm.reset();
+                uploadedImages = [];
+                updateImagePreview();
+                predictedPoints.textContent = '0';
+                fileInput.value = '';
+                stopPointsAnimation();
+                setTimeout(() => {
+                    loadDashboardData();
+                    loadDonationHistory();
+                    loadRewardsData();
+                    loadNotifications();
+                    document.querySelector('[data-target="donor-overview"]').click();
+                }, 1000);
+            } else {
+                throw new Error(result.message || 'Submission failed');
+            }
+        } catch (error) {
+            console.error('Error submitting donation:', error);
+            showNotification('Error: ' + error.message, 'error');
+        } finally {
+            submitBtn.innerHTML = 'Submit Donation';
+            submitBtn.disabled = false;
+        }
+    }
+
+    donationForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const itemName = document.getElementById('item-name').value;
+        const clothTypeValue = document.getElementById('cloth-type').value;
+        const conditionValue = document.getElementById('condition').value;
+        const quantityValue = document.getElementById('quantity').value;
+        const description = document.getElementById('description').value;
+
+        if (!itemName || !clothTypeValue || !conditionValue || !quantityValue) {
+            showNotification('Please fill all required fields: Item Name, Cloth Type, Condition, and Quantity.', 'error');
+            return;
+        }
+        if (uploadedImages.length === 0) {
+            showNotification('Please upload at least one image of the item.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('item_name', itemName);
+        formData.append('cloth_type', clothTypeValue);
+        formData.append('condition', conditionValue);
+        formData.append('quantity', quantityValue);
+        formData.append('description', description);
+        uploadedImages.forEach((file, index) => {
+            formData.append('images', file);
+        });
+
+        await submitDonation(formData);
+    });
+
+    // ==================== VALID POINTS CALCULATION ====================
+    function simulateAIPointsPrediction() {
+        const clothTypeValue = clothType.value;
+        const conditionValue = condition.value;
+        const quantityValue = parseInt(quantity.value) || 0;
+        if (!clothTypeValue || !conditionValue || quantityValue <= 0) {
+            stopPointsAnimation();
+            predictedPoints.textContent = '0';
+            return 0;
+        }
+        let basePoints = 0;
+        if (clothTypeValue === 'silk' || clothTypeValue === 'wool') basePoints = 25;
+        else if (clothTypeValue === 'cotton' || clothTypeValue === 'linen') basePoints = 15;
+        else if (clothTypeValue === 'denim') basePoints = 20;
+        else if (clothTypeValue === 'tshirt') basePoints = 15;
+        else if (clothTypeValue === 'suede') basePoints = 18;
+        else if (clothTypeValue === 'rayon') basePoints = 16;
+        else if (clothTypeValue === 'mixed') basePoints = 12;
+        else if (clothTypeValue === 'other') basePoints = 10;
+        else basePoints = 0;
+        let conditionMultiplier = 0;
+        if (conditionValue === 'excellent') conditionMultiplier = 1.2;
+        else if (conditionValue === 'good') conditionMultiplier = 1;
+        else if (conditionValue === 'fair') conditionMultiplier = 0.8;
+        else if (conditionValue === 'poor') conditionMultiplier = 0.5;
+        const totalPoints = Math.round(basePoints * conditionMultiplier * quantityValue);
+        if (window.pointsInterval) clearInterval(window.pointsInterval);
+        const currentPoints = parseInt(predictedPoints.textContent) || 0;
+        if (currentPoints !== totalPoints && totalPoints > 0) {
+            const increment = totalPoints > currentPoints ? 1 : -1;
+            window.pointsInterval = setInterval(() => {
+                let current = parseInt(predictedPoints.textContent) || 0;
+                if (current === totalPoints) { clearInterval(window.pointsInterval); return; }
+                current += increment;
+                predictedPoints.textContent = current;
+                if ((increment > 0 && current >= totalPoints) || (increment < 0 && current <= totalPoints)) {
+                    predictedPoints.textContent = totalPoints;
+                    clearInterval(window.pointsInterval);
+                }
+            }, 30);
+        } else {
+            predictedPoints.textContent = totalPoints;
+        }
+        return totalPoints;
+    }
+
+    function stopPointsAnimation() {
+        if (window.pointsInterval) clearInterval(window.pointsInterval);
+    }
+
+    function animateCounter(element, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            element.textContent = Math.floor(progress * (end - start) + start).toLocaleString();
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    function redeemPoints(points) {
+        const currentPoints = parseInt(totalPoints.textContent) || 0;
+        if (currentPoints >= points) {
+            if (confirm(`Are you sure you want to redeem ${points} points?`)) {
+                showNotification(`Successfully redeemed ${points} points! Your new balance is ${currentPoints - points} points.`, 'success');
+                animateCounter(totalPoints, currentPoints, currentPoints - points, 1000);
+            }
+        } else {
+            showNotification(`You need ${points - currentPoints} more points to redeem this reward.`, 'error');
+        }
+    }
+
+    function showUploadSection() {
+        document.querySelector('[data-target="upload-cloth"]').click();
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed; top: 20px; right: 20px; padding: 15px 20px;
+            background: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--secondary)' : 'var(--primary)'};
+            color: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 9999; display: flex; align-items: center; gap: 10px;
+            animation: slideIn 0.3s ease; max-width: 400px; font-weight: 600;
+        `;
+        notification.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i><span>${message}</span>`;
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    function initializeEventListeners() {
+        dashboardLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                dashboardLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                dashboardSections.forEach(section => section.classList.remove('active'));
+                const target = link.getAttribute('data-target');
+                const section = document.getElementById(target);
+                if (section) {
+                    section.classList.add('active');
+                    if (target === 'donation-history') loadDonationHistory();
+                    else if (target === 'rewards') loadRewardsData();
+                    else if (target === 'upload-cloth') setTimeout(() => document.getElementById('item-name').focus(), 100);
+                    else if (target === 'notifications') loadNotifications();
+                }
+            });
+        });
+
+        notificationLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            dashboardLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            dashboardSections.forEach(section => section.classList.remove('active'));
+            document.getElementById('notifications').classList.add('active');
+            loadNotifications();
+        });
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--primary)';
+            uploadArea.style.backgroundColor = 'rgba(46, 139, 87, 0.1)';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'var(--beige-dark)';
+            uploadArea.style.backgroundColor = 'white';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--beige-dark)';
+            uploadArea.style.backgroundColor = 'white';
+            if (e.dataTransfer.files.length) {
+                const newFiles = Array.from(e.dataTransfer.files);
+                uploadedImages.push(...newFiles);
+                updateImagePreview();
+            }
+        });
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                const newFiles = Array.from(fileInput.files);
+                uploadedImages.push(...newFiles);
+                updateImagePreview();
+            }
+        });
+
+        clothType.addEventListener('change', simulateAIPointsPrediction);
+        condition.addEventListener('change', simulateAIPointsPrediction);
+        quantity.addEventListener('input', simulateAIPointsPrediction);
+    }
+</script>
+{% endblock %}

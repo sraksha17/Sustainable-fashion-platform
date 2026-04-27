@@ -1,0 +1,22 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ total_donations }}</div>
+        <div>Total Donations</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_products }}</div>
+        <div>Total Products</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_sales }}</div>
+        <div>Total Sales</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">₹{{ total_revenue }}</div>
+        <div>Revenue</div>
+    </div>
+</div>
+{% endblock %}

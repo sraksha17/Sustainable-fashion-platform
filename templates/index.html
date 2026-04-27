@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReStyle - Sustainable Fashion Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Homepage.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <i class="fas fa-recycle"></i>
+                    <h1>ReStyle</h1>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#impact">Impact</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                </ul>
+                <div class="auth-buttons">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Login</a>
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-primary">Sign Up</a>
+                </div>
+                <div class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Transform Waste<br>and Save the Planet</h1>
+                <p>Join thousands giving old clothes a new life through donation, upcycling, and sustainable fashion.</p>
+                <div class="hero-buttons">
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-primary">Join ReStyle Now</a>
+                    <a href="#impact" class="btn btn-secondary">See the Impact</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works">
+        <div class="container">
+            <div class="section-title">
+                <h2>How ReStyle Works</h2>
+                <p>Three simple ways to reduce waste and look good doing it</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-icon"><i class="fas fa-tshirt"></i></div>
+                    <h3>Donate Clothes</h3>
+                    <p>Upload your unused clothes & earn reward points.</p>
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-outline">Donate Now</a>
+                </div>
+                <div class="step">
+                    <div class="step-icon"><i class="fas fa-cut"></i></div>
+                    <h3>Design & Create</h3>
+                    <p>Turn donated fabrics into unique, eco-fashion.</p>
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-outline">Become a Designer</a>
+                </div>
+                <div class="step">
+                    <div class="step-icon"><i class="fas fa-shopping-bag"></i></div>
+                    <h3>Shop Sustainable</h3>
+                    <p>Buy one-of-a-kind pieces with zero waste guilt.</p>
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-outline">Shop Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats" id="impact">
+        <div class="container">
+            <h2 style="text-align:center; color:white; margin-bottom:40px;">The Fashion Industry Crisis</h2>
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-number">92 Million</div>
+                    <div class="stat-text">Tons of textile waste<br>generated yearly</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">10%</div>
+                    <div class="stat-text">Of global CO₂ emissions<br>from fashion</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">20,000</div>
+                    <div class="stat-text">Liters of water<br>per pair of jeans</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">85%</div>
+                    <div class="stat-text">Of textiles<br>end up in landfills</div>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:50px;">
+                <a href="/waste-info" class="btn btn-secondary">Show More – Why ReStyle Wins</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="section-title">
+                <h2>Community Love</h2>
+                <p>Real people, real impact</p>
+            </div>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-text">"I donated 20+ items and bought a gorgeous upcycled dress with my points!"</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar"></div>
+                        <div class="author-info"><h4>Jessica L.</h4><p>Donor & Buyer</p></div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">"ReStyle gave me free materials and a marketplace. Best platform ever!"</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar"></div>
+                        <div class="author-info"><h4>Maria R.</h4><p>Designer</p></div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">"Finally, fashion I can feel good about. Every piece has a story."</div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar"></div>
+                        <div class="author-info"><h4>David K.</h4><p>Eco Shopper</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <h2>Be the Change Fashion Needs</h2>
+            <p>Join thousands already reducing textile waste with style.</p>
+            <a href="{{ url_for('auth.signup') }}" class="btn btn-secondary">Join ReStyle Today – Free</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>ReStyle</h3>
+                    <p>Turning waste into wearable art.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
+                        <li><a href="/waste-info">Textile Waste Facts</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 ReStyle. Made with love for Earth.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', () => {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

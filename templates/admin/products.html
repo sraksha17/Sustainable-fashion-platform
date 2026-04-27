@@ -1,0 +1,300 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Marketplace Products{% endblock %}
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add New Product</a>
+</div>
+
+<div class="card">
+    <h2>All Upcycled Products</h2>
+    <div style="overflow-x: auto;">
+        <table class="donation-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Designer</th>
+                    <th>Price</th>
+                    <th>Points</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="products-table-body">
+                <tr><td colspan="7" style="text-align: center;">Loading products...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Edit Product Modal (improved for small screens) -->
+<div id="editProductModal" class="modal">
+    <div class="modal-content" style="max-height: 90vh; overflow-y: auto; padding: 25px;">
+        <span class="close-modal" onclick="closeEditModal()">&times;</span>
+        <h3>Edit Product</h3>
+        <form id="editProductForm">
+            <input type="hidden" id="edit_product_id">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" id="edit_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Price (₹)</label>
+                <input type="number" step="0.01" id="edit_price" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="edit_description" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Size</label>
+                <input type="text" id="edit_size" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Style</label>
+                <input type="text" id="edit_style" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Source Material</label>
+                <input type="text" id="edit_material" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Designer Name</label>
+                <input type="text" id="edit_designer" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Reward Points</label>
+                <input type="number" id="edit_points" class="form-control" value="0">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Load products from API and render table
+    async function loadProducts() {
+        const response = await fetch('/api/admin/products');
+        const data = await response.json();
+        const tbody = document.getElementById('products-table-body');
+        if (data.status === 'success' && data.products.length > 0) {
+            tbody.innerHTML = '';
+            for (const p of data.products) {
+                const row = tbody.insertRow();
+                // Image
+                const imgCell = row.insertCell(0);
+                imgCell.innerHTML = p.image_url ? `<img src="${p.image_url}" class="donation-image" style="width:60px;height:60px;object-fit:cover;" onclick="showImage('${p.image_url}')">` : 'No image';
+                // Name
+                row.insertCell(1).innerHTML = p.name;
+                // Designer
+                row.insertCell(2).innerHTML = p.designer_name;
+                // Price
+                row.insertCell(3).innerHTML = `₹${p.price}`;
+                // Points
+                row.insertCell(4).innerHTML = p.reward_points || 0;
+                // Status
+                row.insertCell(5).innerHTML = `<span class="status-badge status-${p.status}">${p.status}</span>`;
+                // Actions
+                const actionsCell = row.insertCell(6);
+                actionsCell.innerHTML = `
+                    <div class="action-icons">
+                        <i class="fas fa-edit" onclick="openEditModal('${p._id}')" title="Edit Details"></i>
+                        <i class="fas fa-sync-alt" onclick="toggleStatus('${p._id}', '${p.status}')" title="Toggle Available/Sold"></i>
+                        <i class="fas fa-trash-alt" onclick="deleteProduct('${p._id}')" title="Delete"></i>
+                    </div>
+                `;
+            }
+        } else {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No products found.</td></tr>';
+        }
+    }
+
+    // Toggle product status (available <-> sold)
+    async function toggleStatus(productId, currentStatus) {
+        const newStatus = currentStatus === 'available' ? 'sold' : 'available';
+        const response = await fetch('/api/admin/products/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: productId, status: newStatus })
+        });
+        if (response.ok) {
+            loadProducts();
+        } else {
+            alert('Failed to update status');
+        }
+    }
+
+    // Delete product
+    async function deleteProduct(productId) {
+        if (confirm('Delete this product permanently? This action cannot be undone.')) {
+            const response = await fetch('/api/admin/products/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: productId })
+            });
+            if (response.ok) {
+                loadProducts();
+            } else {
+                alert('Failed to delete product');
+            }
+        }
+    }
+
+    // Open edit modal and fetch product details
+    async function openEditModal(productId) {
+        const response = await fetch(`/api/admin/product-details/${productId}`);
+        const data = await response.json();
+        if (data.status === 'success') {
+            const p = data.product;
+            document.getElementById('edit_product_id').value = productId;
+            document.getElementById('edit_name').value = p.name || '';
+            document.getElementById('edit_price').value = p.price || 0;
+            document.getElementById('edit_description').value = p.description || '';
+            document.getElementById('edit_size').value = p.size || '';
+            document.getElementById('edit_style').value = p.style || '';
+            document.getElementById('edit_material').value = p.source_material || '';
+            document.getElementById('edit_designer').value = p.designer_name || '';
+            document.getElementById('edit_points').value = p.reward_points || 0;
+            document.getElementById('editProductModal').style.display = 'flex';
+        } else {
+            alert('Failed to load product details');
+        }
+    }
+
+    // Close edit modal
+    function closeEditModal() {
+        document.getElementById('editProductModal').style.display = 'none';
+    }
+
+    // Save edited product details
+    document.getElementById('editProductForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const productId = document.getElementById('edit_product_id').value;
+        const payload = {
+            product_id: productId,
+            name: document.getElementById('edit_name').value,
+            price: parseFloat(document.getElementById('edit_price').value),
+            description: document.getElementById('edit_description').value,
+            size: document.getElementById('edit_size').value,
+            style: document.getElementById('edit_style').value,
+            source_material: document.getElementById('edit_material').value,
+            designer_name: document.getElementById('edit_designer').value,
+            reward_points: parseInt(document.getElementById('edit_points').value) || 0
+        };
+        const response = await fetch('/api/admin/products/update-details', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (response.ok) {
+            alert('Product updated successfully');
+            closeEditModal();
+            loadProducts();
+        } else {
+            alert('Failed to update product');
+        }
+    });
+
+    // Image modal
+    function showImage(url) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content" style="background:transparent; text-align:center;">
+                <span class="close-modal" style="color:white; position:absolute; top:20px; right:40px; font-size:40px; cursor:pointer;">&times;</span>
+                <img src="${url}" style="max-width:90vw; max-height:90vh; border-radius:8px;">
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.querySelector('.close-modal').onclick = () => modal.remove();
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    }
+
+    // Initial load
+    loadProducts();
+</script>
+
+<style>
+    .action-icons i {
+        margin: 0 5px;
+        cursor: pointer;
+        font-size: 18px;
+    }
+    .fa-edit { color: #f59e0b; }
+    .fa-sync-alt { color: #3498db; }
+    .fa-trash-alt { color: #dc2626; }
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+    }
+    .status-available { background: #2ecc71; }
+    .status-sold { background: #e74c3c; }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        max-width: 600px;
+        width: 90%;
+        padding: 25px;
+        position: relative;
+    }
+    .close-modal {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 28px;
+        cursor: pointer;
+        color: #666;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+    }
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    @media (max-width: 768px) {
+        .modal-content {
+            width: 95%;
+            padding: 15px;
+        }
+        .form-group input, .form-group textarea {
+            font-size: 14px;
+        }
+    }
+</style>
+{% endblock %}

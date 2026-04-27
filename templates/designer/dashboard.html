@@ -1,0 +1,1173 @@
+{% extends "base.html" %}
+{% block title %}Designer Dashboard{% endblock %}
+{% block content %}
+<style>
+    /* ========== ALL YOUR EXISTING CSS ========== */
+    :root {
+        --primary: #2e8b57;
+        --primary-light: #4caf7d;
+        --primary-dark: #1f6b3d;
+        --secondary: #ff6b6b;
+        --accent: #ffd166;
+        --beige: #fefcf8;
+        --beige-dark: #f5f2eb;
+        --light: #f8f9fa;
+        --dark: #2d3436;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --success: #28a745;
+        --warning: #ffc107;
+        --info: #17a2b8;
+    }
+    
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    body {
+        background-color: var(--beige);
+        color: var(--dark);
+        line-height: 1.6;
+    }
+    
+    .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        padding: 25px 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .dashboard-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .dashboard-nav ul {
+        display: flex;
+        list-style: none;
+        gap: 30px;
+    }
+    
+    .dashboard-nav a {
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 25px;
+        transition: all 0.3s;
+        font-size: 16px;
+    }
+    
+    .dashboard-nav a.active {
+        background-color: rgba(255, 255, 255, 0.25);
+    }
+    
+    .dashboard-nav a:hover:not(.active) {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    .notification-icon {
+        position: relative;
+        background: rgba(255, 255, 255, 0.25);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .notification-icon:hover {
+        background-color: rgba(255, 255, 255, 0.35);
+    }
+    
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: var(--secondary);
+        color: white;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+    }
+    
+    .notification-badge.hidden {
+        display: none;
+    }
+    
+    .dashboard-content {
+        padding: 40px 0;
+    }
+    
+    .dashboard-section {
+        display: none;
+    }
+    
+    .dashboard-section.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    h2 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 900;
+        font-size: 32px;
+        color: var(--primary);
+        margin-bottom: 10px;
+    }
+    
+    h3 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+        font-size: 24px;
+        color: var(--primary);
+        margin: 25px 0 15px;
+    }
+    
+    p {
+        font-size: 16px;
+        color: var(--dark);
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px 25px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        text-align: center;
+        transition: transform 0.3s;
+        border: 1px solid var(--beige-dark);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-value {
+        font-size: 42px;
+        font-weight: 900;
+        color: var(--primary);
+        margin-bottom: 5px;
+        font-family: 'Montserrat', sans-serif;
+    }
+    
+    .stat-label {
+        color: var(--gray);
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+    }
+    
+    .card {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        transition: transform 0.3s;
+        border: 1px solid var(--beige-dark);
+    }
+    
+    .card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-img {
+        height: 200px;
+        background-color: var(--beige-dark);
+        background-size: cover;
+        background-position: center;
+    }
+    
+    .card-body {
+        padding: 25px;
+    }
+    
+    .card-title {
+        font-size: 20px;
+        margin-bottom: 10px;
+        color: var(--primary);
+        font-weight: 800;
+        font-family: 'Montserrat', sans-serif;
+    }
+    
+    .card-text {
+        color: var(--gray);
+        margin-bottom: 15px;
+    }
+    
+    .card-footer {
+        padding: 20px 25px;
+        background-color: var(--beige);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 12px 25px;
+        border-radius: 30px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 15px;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+    }
+    
+    .btn-outline {
+        background-color: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+    }
+    
+    .btn-outline:hover {
+        background-color: var(--primary);
+        color: white;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+    
+    .status-pending {
+        background-color: var(--warning);
+        color: var(--dark);
+    }
+    
+    .status-completed {
+        background-color: var(--success);
+        color: white;
+    }
+    
+    .status-in-progress {
+        background-color: var(--info);
+        color: white;
+    }
+    
+    .status-overdue {
+        background-color: var(--secondary);
+        color: white;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        background: white;
+    }
+    
+    .table th, .table td {
+        padding: 18px 20px;
+        text-align: left;
+        border-bottom: 1px solid var(--beige-dark);
+    }
+    
+    .table th {
+        background-color: var(--primary);
+        color: white;
+        font-weight: 700;
+    }
+    
+    .table tr:hover {
+        background-color: rgba(46, 139, 87, 0.03);
+    }
+    
+    .upload-area {
+        border: 2px dashed var(--beige-dark);
+        border-radius: 15px;
+        padding: 50px;
+        text-align: center;
+        margin-bottom: 30px;
+        transition: all 0.3s;
+        cursor: pointer;
+        background: white;
+    }
+    
+    .upload-area:hover {
+        border-color: var(--primary);
+        background-color: rgba(46, 139, 87, 0.03);
+    }
+    
+    .upload-area i {
+        font-size: 48px;
+        color: var(--primary);
+        margin-bottom: 20px;
+    }
+    
+    /* File preview styles */
+    .file-preview {
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .preview-item {
+        width: 100px;
+        text-align: center;
+        background: var(--beige);
+        padding: 5px;
+        border-radius: 8px;
+        border: 1px solid var(--beige-dark);
+        position: relative;
+    }
+    .preview-item img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+    .preview-item span {
+        display: block;
+        font-size: 12px;
+        word-break: break-all;
+    }
+    .preview-remove {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: var(--secondary);
+        color: white;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+        transition: transform 0.2s;
+    }
+    .preview-remove:hover {
+        transform: scale(1.1);
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 700;
+        color: var(--dark);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 15px 20px;
+        border: 1px solid var(--beige-dark);
+        border-radius: 10px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+        background: white;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+    
+    .notifications {
+        background-color: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        border: 1px solid var(--beige-dark);
+    }
+    
+    .notification-item {
+        padding: 20px;
+        border-bottom: 1px solid var(--beige-dark);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: background-color 0.3s;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+    
+    .notification-item:hover {
+        background-color: var(--beige);
+    }
+    
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+    
+    .notification-item.read {
+        opacity: 0.7;
+    }
+    
+    .notification-icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+    }
+    
+    .notification-content {
+        flex: 1;
+    }
+    
+    .notification-content strong {
+        font-weight: 800;
+        font-size: 17px;
+    }
+    
+    .notification-time {
+        color: var(--gray);
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    .project-card {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        transition: transform 0.3s;
+        border: 1px solid var(--beige-dark);
+    }
+    
+    .project-card:hover {
+        transform: translateY(-8px);
+    }
+    
+    .project-header {
+        padding: 20px 25px;
+        background-color: var(--beige);
+        border-bottom: 1px solid var(--beige-dark);
+    }
+    
+    .project-title {
+        font-size: 20px;
+        margin-bottom: 5px;
+        color: var(--primary);
+        font-weight: 800;
+        font-family: 'Montserrat', sans-serif;
+    }
+    
+    .project-deadline {
+        color: var(--gray);
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    .project-body {
+        padding: 25px;
+    }
+    
+    .project-footer {
+        padding: 20px 25px;
+        background-color: var(--beige);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .period-select {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--beige-dark);
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+    }
+    
+    .period-select:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+</style>
+
+<div class="dashboard">
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="dashboard-nav">
+                <ul>
+                    <li><a href="#" class="dashboard-link active" data-target="designer-overview">Dashboard</a></li>
+                    <li><a href="#" class="dashboard-link" data-target="browse-clothes">Clothes</a></li>
+                    <li><a href="#" class="dashboard-link" data-target="upload-dress">Upload</a></li>
+                    <li><a href="#" class="dashboard-link" data-target="project-history">History</a></li>
+                </ul>
+                <a href="#" class="notification-icon dashboard-link" data-target="notifications" id="notification-link">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge hidden" id="notification-badge">0</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="container">
+            <div id="designer-overview" class="dashboard-section active">
+                <h2>Designer Dashboard</h2>
+                <p>Welcome back! Manage your design projects and track your progress.</p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="active-projects">0</div>
+                        <div class="stat-label">Active Projects</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="completed-projects">0</div>
+                        <div class="stat-label">Completed Projects</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-earnings">0</div>
+                        <div class="stat-label">Total Earnings (₹)</div>
+                    </div>
+                </div>
+                <h3>Ongoing Projects</h3>
+                <div class="dashboard-grid" id="ongoing-projects"></div>
+            </div>
+
+            <div id="browse-clothes" class="dashboard-section">
+                <h2>Browse Donated Clothes</h2>
+                <p>Claim fabrics for your next design project. Remember to return a finished dress before the deadline.</p>
+                <div class="dashboard-grid" id="available-clothes"></div>
+            </div>
+
+            <div id="upload-dress" class="dashboard-section">
+                <h2>Upload Finished Dress</h2>
+                <p>Share your completed designs to list them for sale in the marketplace.</p>
+                <div style="background: #fff3cd; border-left: 5px solid var(--warning); padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                    <i class="fas fa-info-circle"></i> 
+                    <strong>Commission Note:</strong> Upon sale, 20% commission will be retained by ReStyle, and 80% will be transferred to you.
+                </div>
+
+                <form id="dress-form" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="designer-name">Designer Name</label>
+                        <input type="text" id="designer-name" class="form-control" value="Loading..." readonly disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="designer-email">Email</label>
+                        <input type="email" id="designer-email" class="form-control" value="Loading..." readonly disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number <span style="color: var(--secondary);">*</span></label>
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g., +91 98765 43210" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dress-name">Dress Name <span style="color: var(--secondary);">*</span></label>
+                        <input type="text" id="dress-name" name="dress-name" class="form-control" placeholder="e.g., Summer Floral Dress" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="source-material">Source Material</label>
+                        <select id="source-material" name="source-material" class="form-control" required>
+                            <option value="">Select source material</option>
+                            <option value="cotton">Cotton</option>
+                            <option value="denim">Denim</option>
+                            <option value="silk">Silk</option>
+                            <option value="wool">Wool</option>
+                            <option value="linen">Linen</option>
+                            <option value="mixed">Mixed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="size">Size</label>
+                        <select id="size" name="size" class="form-control" required>
+                            <option value="">Select size</option>
+                            <option value="xs">XS</option>
+                            <option value="s">S</option>
+                            <option value="m">M</option>
+                            <option value="l">L</option>
+                            <option value="xl">XL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="style">Style</label>
+                        <select id="style" name="style" class="form-control" required>
+                            <option value="">Select style</option>
+                            <option value="casual">Casual</option>
+                            <option value="formal">Formal</option>
+                            <option value="bohemian">Bohemian</option>
+                            <option value="vintage">Vintage</option>
+                            <option value="modern">Modern</option>
+                            <option value="minimalist">Minimalist</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price (₹) <span style="color: var(--secondary);">*</span></label>
+                        <input type="number" id="price" name="price" class="form-control" min="1" placeholder="Enter selling price in ₹" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dress-description">Description</label>
+                        <textarea id="dress-description" name="description" class="form-control" rows="3" placeholder="Describe your design..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project_id">Link to Project (Optional)</label>
+                        <select id="project_id" name="project_id" class="form-control">
+                            <option value="">-- Select a project (optional) --</option>
+                        </select>
+                        <small>If you created this design from a claimed fabric, select the project to complete it.</small>
+                    </div>
+
+                    <div class="upload-area" id="upload-area">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Upload Photos of Your Finished Dress</h3>
+                        <p>Drag & drop images here or click to browse</p>
+                        <input type="file" id="file-input" name="images" multiple style="display: none;" accept="image/*">
+                    </div>
+
+                    <div id="file-preview" class="file-preview"></div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 18px; font-size: 17px; font-weight: 800;">List for Sale</button>
+                </form>
+            </div>
+
+            <div id="project-history" class="dashboard-section">
+                <h2>Project History & Sales</h2>
+                <p>Track all your design projects, completed items, and earnings.</p>
+                <h3>Recent Projects</h3>
+                <table class="table">
+                    <thead>
+                        <tr><th>Project</th><th>Deadline</th><th>Completed On</th><th>Status</th>  </>
+                    </thead>
+                    <tbody id="projects-table-body"></tbody>
+                  </table>
+                <h3>Sales History</h3>
+                <table class="table">
+                    <thead>
+                        <tr><th>Dress</th><th>Date Sold</th><th>Price (₹)</th><th>Commission (₹)</th><th>Your Earnings (₹)</th>  </>
+                    </thead>
+                    <tbody id="sales-table-body"></tbody>
+                  </table>
+            </div>
+
+            <div id="notifications" class="dashboard-section">
+                <h2>Notifications</h2>
+                <p>Stay updated with your design projects and platform activities.</p>
+                <div class="notifications" id="notifications-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== GLOBAL VARIABLES ====================
+    let currentDesigner = null;
+    let selectedFiles = []; // Store File objects for removal
+    
+    const designerNameInput = document.getElementById('designer-name');
+    const designerEmailInput = document.getElementById('designer-email');
+    const notificationBadge = document.getElementById('notification-badge');
+    const notificationLink = document.getElementById('notification-link');
+    const notificationsList = document.getElementById('notifications-list');
+    const activeProjectsEl = document.getElementById('active-projects');
+    const completedProjectsEl = document.getElementById('completed-projects');
+    const totalEarningsEl = document.getElementById('total-earnings');
+    const availableClothesGrid = document.getElementById('available-clothes');
+    const projectsTableBody = document.getElementById('projects-table-body');
+    const salesTableBody = document.getElementById('sales-table-body');
+    const ongoingProjectsGrid = document.getElementById('ongoing-projects');
+    const dashboardLinks = document.querySelectorAll('.dashboard-link');
+    const dashboardSections = document.querySelectorAll('.dashboard-section');
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const dressForm = document.getElementById('dress-form');
+    const filePreview = document.getElementById('file-preview');
+
+    // ==================== INIT ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDesignerInfo();
+        loadDashboardData();
+        loadNotifications();
+        loadActiveProjects();
+        
+        dashboardLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = link.getAttribute('data-target');
+                dashboardLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                dashboardSections.forEach(s => s.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                if (target === 'upload-dress') {
+                    loadActiveProjects(); // refresh project list when upload tab is opened
+                }
+            });
+        });
+        
+        // Upload area drag & drop
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--primary)';
+            uploadArea.style.backgroundColor = 'rgba(46, 139, 87, 0.1)';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'var(--beige-dark)';
+            uploadArea.style.backgroundColor = 'white';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--beige-dark)';
+            uploadArea.style.backgroundColor = 'white';
+            if (e.dataTransfer.files.length) {
+                addFiles(e.dataTransfer.files);
+            }
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            addFiles(e.target.files);
+            fileInput.value = ''; // allow re-adding same files
+        });
+        
+        notificationLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            fetch('/designer/api/notifications/mark-all-read', { method: 'POST' })
+                .catch(err => console.error('Error marking read:', err));
+            dashboardLinks.forEach(l => l.classList.remove('active'));
+            document.querySelector('[data-target="notifications"]').classList.add('active');
+            dashboardSections.forEach(s => s.classList.remove('active'));
+            document.getElementById('notifications').classList.add('active');
+            loadNotifications();
+        });
+    });
+
+    // ==================== FILE HANDLING ====================
+    function addFiles(newFiles) {
+        for (let i = 0; i < newFiles.length; i++) {
+            selectedFiles.push(newFiles[i]);
+        }
+        renderFilePreview();
+    }
+    
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        renderFilePreview();
+    }
+    
+    function renderFilePreview() {
+        filePreview.innerHTML = '';
+        if (selectedFiles.length === 0) return;
+        
+        selectedFiles.forEach((file, idx) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.innerHTML = `
+                    <img src="${e.target.result}" alt="preview">
+                    <span>${file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name}</span>
+                    <div class="preview-remove" data-index="${idx}">✖</div>
+                `;
+                filePreview.appendChild(div);
+                // attach remove event after element is in DOM
+                div.querySelector('.preview-remove').addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    removeFile(idx);
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // ==================== LOAD DESIGNER INFO ====================
+    async function loadDesignerInfo() {
+        try {
+            const res = await fetch('/designer/api/current');
+            const data = await res.json();
+            if (data.status === 'success') {
+                currentDesigner = data.user;
+                designerNameInput.value = currentDesigner.name;
+                designerEmailInput.value = currentDesigner.email;
+            } else {
+                window.location.href = '/login';
+            }
+        } catch (err) {
+            console.error('Failed to load designer info', err);
+        }
+    }
+
+    // ==================== LOAD ACTIVE PROJECTS (for dropdown) ====================
+    async function loadActiveProjects() {
+        try {
+            const res = await fetch('/designer/api/active-projects');
+            const projects = await res.json();
+            const select = document.getElementById('project_id');
+            select.innerHTML = '<option value="">-- Select a project (optional) --</option>';
+            projects.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p._id;
+                option.textContent = p.donation_name;
+                select.appendChild(option);
+            });
+        } catch (err) {
+            console.error('Error loading active projects:', err);
+        }
+    }
+
+    // ==================== LOAD DASHBOARD DATA ====================
+    async function loadDashboardData() {
+        try {
+            const statsRes = await fetch('/designer/api/stats');
+            const statsData = await statsRes.json();
+            animateCounter(activeProjectsEl, 0, statsData.active_projects || 0, 1000);
+            animateCounter(completedProjectsEl, 0, statsData.completed_projects || 0, 1000);
+            animateCounter(totalEarningsEl, 0, statsData.total_earnings || 0, 1000);
+            
+            const clothesRes = await fetch('/designer/api/available-clothes');
+            const clothesData = await clothesRes.json();
+            renderAvailableClothes(clothesData);
+            
+            const projectsRes = await fetch('/designer/api/projects');
+            const projectsData = await projectsRes.json();
+            renderProjects(projectsData);
+            renderOngoingProjects(projectsData);
+            
+            const salesRes = await fetch('/designer/api/sales');
+            const salesData = await salesRes.json();
+            renderSales(salesData);
+        } catch (err) {
+            console.error('Error loading dashboard data', err);
+        }
+    }
+
+    // ==================== NOTIFICATIONS ====================
+    async function loadNotifications() {
+        try {
+            const res = await fetch('/designer/api/notifications');
+            const data = await res.json();
+            const unreadCount = data.filter(n => !n.read).length;
+            if (unreadCount > 0) {
+                notificationBadge.textContent = unreadCount;
+                notificationBadge.classList.remove('hidden');
+            } else {
+                notificationBadge.classList.add('hidden');
+            }
+            renderNotifications(data);
+        } catch (err) {
+            console.error('Error loading notifications', err);
+        }
+    }
+
+    function renderNotifications(notifications) {
+        notificationsList.innerHTML = '';
+        if (!notifications || notifications.length === 0) {
+            notificationsList.innerHTML = '<p>No notifications.</p>';
+            return;
+        }
+        notifications.forEach(n => {
+            const div = document.createElement('div');
+            div.className = `notification-item ${n.read ? 'read' : ''}`;
+            div.dataset.id = n._id;
+            div.innerHTML = `
+                <div class="notification-icon-circle">
+                    <i class="fas ${n.type === 'claim' ? 'fa-cut' : 'fa-tshirt'}"></i>
+                </div>
+                <div class="notification-content">
+                    <strong>${n.message.split('.')[0]}</strong>
+                    <p>${n.message}</p>
+                    <div class="notification-time">${new Date(n.created_at).toLocaleString()}</div>
+                </div>
+            `;
+            if (!n.read) {
+                div.addEventListener('click', () => markNotificationRead(n._id));
+            }
+            notificationsList.appendChild(div);
+        });
+    }
+
+    async function markNotificationRead(notificationId) {
+        try {
+            await fetch('/designer/api/notifications/mark-read', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notification_id: notificationId })
+            });
+            loadNotifications();
+        } catch (err) {
+            console.error('Error marking read', err);
+        }
+    }
+
+    // ==================== RENDER FUNCTIONS ====================
+    function renderAvailableClothes(clothes) {
+        if (!clothes || clothes.length === 0) {
+            availableClothesGrid.innerHTML = '<p>No clothes available at the moment.</p>';
+            return;
+        }
+        availableClothesGrid.innerHTML = '';
+        clothes.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const imageUrl = item.images && item.images[0] ? item.images[0] : '/static/images/default-cloth.jpg';
+            card.innerHTML = `
+                <div class="card-img" style="background-image: url('${imageUrl}');"></div>
+                <div class="card-body">
+                    <h3 class="card-title">${item.item_name}</h3>
+                    <p class="card-text">${item.description || 'No description'}</p>
+                    <div class="card-footer">
+                        <span>Condition: ${item.condition}</span>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <select class="period-select" data-id="${item._id}" style="padding: 5px; border-radius: 5px;">
+                                <option value="1_week">1 Week</option>
+                                <option value="2_weeks">2 Weeks</option>
+                                <option value="3_weeks">3 Weeks</option>
+                                <option value="1_month" selected>1 Month</option>
+                                <option value="2_months">2 Months</option>
+                                <option value="3_months">3 Months</option>
+                                <option value="4_months">4 Months</option>
+                                <option value="5_months">5 Months</option>
+                                <option value="6_months">6 Months</option>
+                            </select>
+                            <button class="btn btn-primary claim-btn" data-id="${item._id}">Claim</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            availableClothesGrid.appendChild(card);
+        });
+        
+        document.querySelectorAll('.claim-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = btn.dataset.id;
+                const periodSelect = document.querySelector(`.period-select[data-id="${id}"]`);
+                const period = periodSelect ? periodSelect.value : '1_month';
+                if (!confirm(`Claim this fabric? You have ${period.replace('_', ' ')} to return a finished dress.`)) return;
+                try {
+                    const res = await fetch('/designer/api/claim', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ donation_id: id, period: period })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('Claimed successfully!');
+                        btn.textContent = 'Claimed';
+                        btn.disabled = true;
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-outline');
+                        loadDashboardData();
+                        loadNotifications();
+                        loadActiveProjects();
+                    } else {
+                        alert('Error: ' + (data.error || 'Unknown error'));
+                    }
+                } catch (err) {
+                    alert('Network error');
+                }
+            });
+        });
+    }
+
+    function renderProjects(projects) {
+        if (!projects || projects.length === 0) {
+            projectsTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No projects yet.</td></tr>';
+            return;
+        }
+        projectsTableBody.innerHTML = '';
+        projects.forEach(p => {
+            let statusClass = 'status-in-progress';
+            let statusText = p.status;
+            if (p.status === 'completed') {
+                statusClass = 'status-completed';
+            } else if (p.status === 'overdue') {
+                statusClass = 'status-overdue';
+            }
+            const row = document.createElement('tr');
+            const deadline = p.deadline ? new Date(p.deadline).toLocaleDateString() : '-';
+            const completedAt = p.completed_at ? new Date(p.completed_at).toLocaleDateString() : '-';
+            row.innerHTML = `
+                <td>${p.donation_name}</td>
+                <td>${deadline}</td>
+                <td>${completedAt}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            `;
+            projectsTableBody.appendChild(row);
+        });
+    }
+
+    function renderSales(sales) {
+        if (!sales || sales.length === 0) {
+            salesTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No sales yet.</td></tr>';
+            return;
+        }
+        salesTableBody.innerHTML = '';
+        sales.forEach(s => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${s.design_name}</td>
+                <td>${new Date(s.sold_at).toLocaleDateString()}</td>
+                <td>₹${s.price}</td>
+                <td>₹${s.commission}</td>
+                <td>₹${s.designer_earnings}</td>
+            `;
+            salesTableBody.appendChild(row);
+        });
+    }
+
+    function renderOngoingProjects(projects) {
+        const ongoing = projects.filter(p => p.status === 'in_progress' || p.status === 'overdue');
+        if (!ongoing.length) {
+            ongoingProjectsGrid.innerHTML = '<p>No ongoing projects.</p>';
+            return;
+        }
+        ongoingProjectsGrid.innerHTML = '';
+        ongoing.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'project-card';
+            const imageUrl = p.image_url || '/static/images/default-cloth.jpg';
+            card.innerHTML = `
+                <div class="project-header">
+                    <h3 class="project-title">${p.donation_name}</h3>
+                    <div class="project-deadline">Deadline: ${new Date(p.deadline).toLocaleDateString()}</div>
+                </div>
+                <div class="card-img" style="background-image: url('${imageUrl}');"></div>
+                <div class="project-body">
+                    <p class="card-text">Claimed on ${new Date(p.claimed_at).toLocaleDateString()}</p>
+                    <div class="card-footer">
+                        <span class="status-badge ${p.status === 'overdue' ? 'status-overdue' : 'status-in-progress'}">${p.status}</span>
+                    </div>
+                </div>
+            `;
+            ongoingProjectsGrid.appendChild(card);
+        });
+    }
+
+    // ==================== UPLOAD FORM ====================
+    dressForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (selectedFiles.length === 0) {
+            alert('Please select at least one image.');
+            return;
+        }
+        
+        const submitBtn = dressForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Uploading...';
+        submitBtn.disabled = true;
+        
+        const formData = new FormData();
+        formData.append('name', document.getElementById('dress-name').value);
+        formData.append('source_material', document.getElementById('source-material').value);
+        formData.append('size', document.getElementById('size').value);
+        formData.append('style', document.getElementById('style').value);
+        formData.append('price', document.getElementById('price').value);
+        formData.append('description', document.getElementById('dress-description').value);
+        formData.append('phone', document.getElementById('phone').value);
+        
+        const projectId = document.getElementById('project_id').value;
+        if (projectId) {
+            formData.append('project_id', projectId);
+        }
+        
+        for (let i = 0; i < selectedFiles.length; i++) {
+            formData.append('images', selectedFiles[i]);
+        }
+        
+        try {
+            const res = await fetch('/designer/api/upload-design', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Design uploaded successfully!');
+                dressForm.reset();
+                selectedFiles = [];
+                renderFilePreview();
+                loadDashboardData();
+                loadNotifications();
+                loadActiveProjects();
+            } else {
+                alert('Error: ' + (data.message || 'Unknown error'));
+            }
+        } catch (err) {
+            console.error('Upload error:', err);
+            alert('Network error: ' + err.message);
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+
+    // ==================== ANIMATE COUNTER ====================
+    function animateCounter(element, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const value = Math.floor(progress * (end - start) + start);
+            element.textContent = value.toLocaleString('en-IN');
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // Auto-refresh notifications every 30 seconds
+    setInterval(loadNotifications, 30000);
+</script>
+{% endblock %}

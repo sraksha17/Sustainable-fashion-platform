@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReStyle Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --primary-light: #5dade2;
+            --secondary: #2c3e50;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #7f8c8d;
+            --white: #ffffff;
+            --shadow: 0 0.5rem 1rem rgba(0,0,0,0.05);
+            --border-radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            display: flex;
+            min-height: 100vh;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            position: fixed;
+            height: 100%;
+            padding: 30px 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+        }
+        .sidebar ul { list-style: none; }
+        .sidebar ul li {
+            margin: 8px 20px;
+            cursor: pointer;
+        }
+        .sidebar ul li a, .sidebar ul li {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .sidebar ul li a i, .sidebar ul li i {
+            width: 24px;
+            font-size: 1.2rem;
+        }
+        .sidebar ul li:hover, .sidebar ul li.active, .sidebar ul li a:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        /* Main content */
+        .main-content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            padding: 30px;
+        }
+        .top-bar {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 15px 25px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+        .top-bar h1 { font-size: 1.5rem; font-weight: 600; color: var(--secondary); }
+        .logout-btn {
+            background: var(--danger);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-value { font-size: 2.5rem; font-weight: 800; color: var(--primary); }
+        .stat-label { color: var(--gray); font-weight: 500; }
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            background: #e5e7eb;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        table {
+            width: 100%;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th { background: #f1f5f9; font-weight: 600; }
+        .donation-img, .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-collected { background: #dbeafe; color: #2563eb; }
+        .status-upcycled { background: #d1fae5; color: #059669; }
+        .status-rejected { background: #fee2e2; color: #dc2626; }
+        .status-available { background: #d1fae5; color: #059669; }
+        .status-sold { background: #fee2e2; color: #dc2626; }
+        .action-btn {
+            padding: 4px 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 2px;
+            font-size: 12px;
+        }
+        .btn-collect { background: #2563eb; color: white; }
+        .btn-upcycle { background: #059669; color: white; }
+        .btn-reject { background: #dc2626; color: white; }
+        .action-icons i {
+            margin: 0 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .fa-edit { color: #f59e0b; }
+        .fa-trash-alt { color: #dc2626; }
+        .fa-pen { color: #3498db; }
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            padding: 25px;
+            position: relative;
+        }
+        .modal-content img { width: 100%; border-radius: 8px; }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; }
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 240px; }
+            .main-content { margin-left: 240px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>ReStyle Admin</h2>
+        <ul>
+            <li data-tab="dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
+            <li data-tab="donations"><i class="fas fa-tshirt"></i> Donations</li>
+            <li data-tab="sales"><i class="fas fa-shopping-cart"></i> Sales</li>
+            <li data-tab="products"><i class="fas fa-couch"></i> Marketplace</li>
+            <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="top-bar">
+            <h1>Admin Panel</h1>
+            <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboardTab">
+            <div class="stats-grid" id="statsGrid"></div>
+        </div>
+
+        <!-- Donations -->
+        <div id="donationsTab" style="display: none;">
+            <div class="filters">
+                <button class="filter-btn active" data-status="all">All</button>
+                <button class="filter-btn" data-status="pending">Pending</button>
+                <button class="filter-btn" data-status="collected">Collected</button>
+                <button class="filter-btn" data-status="upcycled">Upcycled</button>
+                <button class="filter-btn" data-status="rejected">Rejected</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="donationsTable">
+                    <thead><tr><th>Image</th><th>Donor</th><th>Item</th><th>Points</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sales -->
+        <div id="salesTab" style="display: none;">
+            <div style="overflow-x: auto;">
+                <table id="salesTable">
+                    <thead><tr><th>Design</th><th>Buyer</th><th>Designer</th><th>Price</th><th>Commission</th><th>Designer Earnings</th><th>Date</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Marketplace Products -->
+        <div id="productsTab" style="display: none;">
+            <div class="filters">
+                <button class="filter-btn" id="showAvailableBtn">Available</button>
+                <button class="filter-btn" id="showSoldBtn">Sold</button>
+                <button class="filter-btn active" id="showAllProductsBtn">All</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="productsTable">
+                    <thead><tr><th>Image</th><th>Name</th><th>Designer</th><th>Price</th><th>Points</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="editProductModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Edit Product</h3>
+            <form id="editProductForm">
+                <input type="hidden" id="edit_product_id">
+                <div class="form-group"><label>Name</label><input type="text" id="edit_name" class="form-control"></div>
+                <div class="form-group"><label>Price (₹)</label><input type="number" step="0.01" id="edit_price" class="form-control"></div>
+                <div class="form-group"><label>Description</label><textarea id="edit_description" class="form-control" rows="2"></textarea></div>
+                <div class="form-group"><label>Size</label><input type="text" id="edit_size" class="form-control"></div>
+                <div class="form-group"><label>Style</label><input type="text" id="edit_style" class="form-control"></div>
+                <div class="form-group"><label>Source Material</label><input type="text" id="edit_material" class="form-control"></div>
+                <div class="form-group"><label>Designer Name</label><input type="text" id="edit_designer" class="form-control"></div>
+                <div class="form-group"><label>Reward Points (for buyer redemption)</label><input type="number" id="edit_points" class="form-control" value="0"></div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentDonationFilter = 'all';
+        let currentProductFilter = 'all';
+        let productsData = [];
+
+        // Load stats
+        async function loadStats() {
+            const res = await fetch('/api/admin/stats');
+            const data = await res.json();
+            if (data.status === 'success') {
+                const s = data.stats;
+                document.getElementById('statsGrid').innerHTML = `
+                    <div class="stat-card"><div class="stat-value">${s.total_donations}</div><div class="stat-label">Total Donations</div></div>
+                    <div class="stat-card"><div class="stat-value">${s.pending_donations}</div><div class="stat-label">Pending</div></div>
+                    <div class="stat-card"><div class="stat-value">${s.collected_donations}</div><div class="stat-label">Collected</div></div>
+                    <div class="stat-card"><div class="stat-value">${s.upcycled_donations}</div><div class="stat-label">Upcycled</div></div>
+                    <div class="stat-card"><div class="stat-value">${s.total_users}</div><div class="stat-label">Donors</div></div>
+                `;
+            }
+        }
+
+        // Donations
+        async function loadDonations() {
+            const res = await fetch(`/api/admin/donations?status=${currentDonationFilter}`);
+            const data = await res.json();
+            if (data.status === 'success') {
+                const tbody = document.querySelector('#donationsTable tbody');
+                tbody.innerHTML = '';
+                for (const d of data.donations) {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerHTML = `<img src="${d.image_url}" class="donation-img" onclick="showImage('${d.image_url}')">`;
+                    row.insertCell(1).innerHTML = `${d.donor_name}<br><small>${d.donor_email}</small>`;
+                    row.insertCell(2).innerHTML = `<strong>${d.item_name}</strong><br>${d.cloth_type} | ${d.condition} | Qty:${d.quantity}`;
+                    row.insertCell(3).innerHTML = d.points;
+                    row.insertCell(4).innerHTML = `<span class="status-badge status-${d.status}">${d.status}</span>`;
+                    let actions = '';
+                    if (d.status === 'pending') actions = `<button class="action-btn btn-collect" onclick="updateDonationStatus('${d._id}','collected')">Collect</button>`;
+                    if (d.status === 'collected') actions = `<button class="action-btn btn-upcycle" onclick="updateDonationStatus('${d._id}','upcycled')">Upcycle</button>`;
+                    if (d.status === 'pending') actions += `<button class="action-btn btn-reject" onclick="updateDonationStatus('${d._id}','rejected')">Reject</button>`;
+                    row.insertCell(5).innerHTML = actions;
+                }
+            }
+        }
+
+        async function updateDonationStatus(id, status) {
+            const res = await fetch('/api/admin/update-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ donation_id: id, status: status })
+            });
+            if (res.ok) loadDonations();
+        }
+
+        // Sales
+        async function loadSales() {
+            const res = await fetch('/api/admin/sales');
+            const data = await res.json();
+            if (data.status === 'success') {
+                const tbody = document.querySelector('#salesTable tbody');
+                tbody.innerHTML = '';
+                for (const s of data.sales) {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerHTML = s.design_name;
+                    row.insertCell(1).innerHTML = s.buyer_email;
+                    row.insertCell(2).innerHTML = s.designer_email;
+                    row.insertCell(3).innerHTML = `₹${s.price}`;
+                    row.insertCell(4).innerHTML = `₹${s.commission}`;
+                    row.insertCell(5).innerHTML = `₹${s.designer_earnings}`;
+                    row.insertCell(6).innerHTML = s.sold_at;
+                }
+            }
+        }
+
+        // Products
+        async function loadProducts() {
+            const res = await fetch('/api/admin/products');
+            const data = await res.json();
+            if (data.status === 'success') {
+                productsData = data.products;
+                let filtered = productsData;
+                if (currentProductFilter === 'available') filtered = filtered.filter(p => p.status === 'available');
+                else if (currentProductFilter === 'sold') filtered = filtered.filter(p => p.status === 'sold');
+                const tbody = document.querySelector('#productsTable tbody');
+                tbody.innerHTML = '';
+                for (const p of filtered) {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerHTML = p.image_url ? `<img src="${p.image_url}" class="product-img" onclick="showImage('${p.image_url}')">` : 'No image';
+                    row.insertCell(1).innerHTML = p.name;
+                    row.insertCell(2).innerHTML = p.designer_name;
+                    row.insertCell(3).innerHTML = `₹${p.price}`;
+                    row.insertCell(4).innerHTML = p.reward_points || 0;
+                    row.insertCell(5).innerHTML = `<span class="status-badge status-${p.status}">${p.status}</span>`;
+                    row.insertCell(6).innerHTML = `
+                        <div class="action-icons">
+                            <i class="fas fa-pen" onclick="openEditModal('${p._id}')" title="Edit Details"></i>
+                            <i class="fas fa-edit" onclick="toggleProductStatus('${p._id}', '${p.status}')" title="Toggle Available/Sold"></i>
+                            <i class="fas fa-trash-alt" onclick="deleteProduct('${p._id}')" title="Delete"></i>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        async function toggleProductStatus(id, currentStatus) {
+            const newStatus = currentStatus === 'available' ? 'sold' : 'available';
+            const res = await fetch('/api/admin/products/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: id, status: newStatus })
+            });
+            if (res.ok) loadProducts();
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('Delete this product permanently?')) {
+                const res = await fetch('/api/admin/products/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: id })
+                });
+                if (res.ok) loadProducts();
+            }
+        }
+
+        // Open edit modal and populate fields
+        function openEditModal(productId) {
+            const product = productsData.find(p => p._id === productId);
+            if (!product) return;
+            document.getElementById('edit_product_id').value = productId;
+            document.getElementById('edit_name').value = product.name;
+            document.getElementById('edit_price').value = product.price;
+            // Fetch full details from server? For simplicity we'll use the existing product data.
+            // But we need description, size, etc. Let's fetch full product details from a new endpoint or assume they are in productsData.
+            // For now, we'll load from productsData (which may be missing some fields). Better to fetch from server.
+            fetchProductDetails(productId);
+        }
+
+        async function fetchProductDetails(productId) {
+            const res = await fetch(`/api/admin/product-details/${productId}`);
+            const data = await res.json();
+            if (data.status === 'success') {
+                const p = data.product;
+                document.getElementById('edit_name').value = p.name;
+                document.getElementById('edit_price').value = p.price;
+                document.getElementById('edit_description').value = p.description || '';
+                document.getElementById('edit_size').value = p.size || '';
+                document.getElementById('edit_style').value = p.style || '';
+                document.getElementById('edit_material').value = p.source_material || '';
+                document.getElementById('edit_designer').value = p.designer_name || '';
+                document.getElementById('edit_points').value = p.reward_points || 0;
+                document.getElementById('editProductModal').style.display = 'flex';
+            }
+        }
+
+        // Save product details
+        document.getElementById('editProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const productId = document.getElementById('edit_product_id').value;
+            const payload = {
+                product_id: productId,
+                name: document.getElementById('edit_name').value,
+                price: parseFloat(document.getElementById('edit_price').value),
+                description: document.getElementById('edit_description').value,
+                size: document.getElementById('edit_size').value,
+                style: document.getElementById('edit_style').value,
+                source_material: document.getElementById('edit_material').value,
+                designer_name: document.getElementById('edit_designer').value,
+                reward_points: parseInt(document.getElementById('edit_points').value) || 0
+            };
+            const res = await fetch('/api/admin/products/update-details', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                alert('Product updated');
+                document.getElementById('editProductModal').style.display = 'none';
+                loadProducts();
+            } else {
+                alert('Update failed');
+            }
+        });
+
+        // Image modal
+        function showImage(url) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `<div class="modal-content" style="background:transparent; text-align:center;"><span class="close-modal" style="color:white;">&times;</span><img src="${url}" style="max-width:90vw; max-height:90vh;"></div>`;
+            document.body.appendChild(modal);
+            modal.style.display = 'flex';
+            modal.querySelector('.close-modal').onclick = () => modal.remove();
+            modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+        }
+
+        // Tab switching
+        function switchTab(tabId) {
+            document.querySelectorAll('#dashboardTab, #donationsTab, #salesTab, #productsTab').forEach(t => t.style.display = 'none');
+            document.getElementById(tabId + 'Tab').style.display = 'block';
+            if (tabId === 'dashboard') loadStats();
+            if (tabId === 'donations') loadDonations();
+            if (tabId === 'sales') loadSales();
+            if (tabId === 'products') loadProducts();
+        }
+
+        document.querySelectorAll('.sidebar ul li[data-tab]').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.sidebar ul li').forEach(li => li.classList.remove('active'));
+                item.classList.add('active');
+                switchTab(item.getAttribute('data-tab'));
+            });
+        });
+
+        // Donation filter
+        document.querySelectorAll('#donationsTab .filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#donationsTab .filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentDonationFilter = btn.getAttribute('data-status');
+                loadDonations();
+            });
+        });
+
+        // Product filters
+        document.getElementById('showAvailableBtn')?.addEventListener('click', () => {
+            currentProductFilter = 'available';
+            document.querySelectorAll('#productsTab .filter-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('showAvailableBtn').classList.add('active');
+            loadProducts();
+        });
+        document.getElementById('showSoldBtn')?.addEventListener('click', () => {
+            currentProductFilter = 'sold';
+            document.querySelectorAll('#productsTab .filter-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('showSoldBtn').classList.add('active');
+            loadProducts();
+        });
+        document.getElementById('showAllProductsBtn')?.addEventListener('click', () => {
+            currentProductFilter = 'all';
+            document.querySelectorAll('#productsTab .filter-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('showAllProductsBtn').classList.add('active');
+            loadProducts();
+        });
+
+        // Close modal on X
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('editProductModal').style.display = 'none';
+            });
+        });
+        window.onclick = (e) => {
+            if (e.target === document.getElementById('editProductModal')) {
+                document.getElementById('editProductModal').style.display = 'none';
+            }
+        };
+
+        // Initial load
+        loadStats();
+    </script>
+</body>
+</html>

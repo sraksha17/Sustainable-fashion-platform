@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card text-center shadow-sm">
+                <div class="card-body py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 80px;"></i>
+                    </div>
+                    <h2 class="text-success">Payment Successful!</h2>
+                    <p class="lead mt-3">Thank you for your purchase. Your order has been placed successfully.</p>
+                    <p>A confirmation has been sent to your email address.</p>
+                    <hr>
+                    <a href="{{ url_for('buyer.dashboard') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                    </a>
+                    <a href="{{ url_for('buyer.marketplace') }}" class="btn btn-outline-success mt-3">
+                        <i class="fas fa-shopping-bag"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
